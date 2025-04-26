@@ -1,0 +1,103 @@
+# ---------------------------
+# .NET (.NET Core, .NET 5/6/7+)
+# ---------------------------
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+TestResults/
+.vscode/
+*.swp
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish outputs
+publish/
+out/
+*.Publish.xml
+
+# Entity Framework Migrations
+Migrations/
+
+# DotCover
+.idea/
+*.dotCover
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Rider
+.idea/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code settings
+.vscode/
+.history/
+
+# Packages
+**/packages/*
+!**/packages/build/
+!**/packages/repositories.config
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Backup & temp files
+*.bak
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# ---------------------------
+# Angular
+# ---------------------------
+# Compiled output
+/dist/
+/out-tsc/
+/build/
+
+# Node modules
+/node_modules/
+
+# IDE
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Compiled JavaScript
+*.js
+*.js.map
+
+# Angular specific
+.angular/cache/
+.angular/config.json
+
+# Environment files
+src/environments/environment*.ts
+
+# npm
+package-lock.json
+yarn.lock
+
+# misc
+.DS_Store
+Thumbs.db
