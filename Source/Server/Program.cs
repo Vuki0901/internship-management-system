@@ -3,15 +3,20 @@ using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using InternshipManagementSystem.Infrastructure.Configurations;
+using InternshipManagementSystem.Persistency;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtConfigurationSection = builder.Configuration.GetSection(nameof(JwtConfiguration));
 
+var connectionString = builder.Configuration.GetConnectionString("Database");
 var jwtConfiguration = jwtConfigurationSection.Get<JwtConfiguration>()!;
+
+builder.Services.AddDbContext<DatabaseContext>(o => o.UseSqlServer(connectionString));
 
 builder.Services.AddFastEndpoints()
     .SwaggerDocument(
@@ -44,7 +49,7 @@ builder.Services.AddCors(
                 pb.AllowAnyOrigin();
                 pb.AllowAnyHeader();
                 pb.AllowAnyMethod();
-                pb.AllowCredentials();
+                //pb.AllowCredentials();
             }
         );
     }

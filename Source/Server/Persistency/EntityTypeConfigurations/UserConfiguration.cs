@@ -10,5 +10,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasIndex(u => u.EmailAddress).IsUnique();
         builder.HasMany<UserRole>(u => u.Roles).WithOne();
+        
+        builder.Property(u => u.EmailAddress).IsRequired().HasMaxLength(256);
+        builder.Property(u => u.Password).IsRequired().HasMaxLength(256);
+        builder.Property(u => u.FirstName).IsRequired().HasMaxLength(50);
+        builder.Property(u => u.LastName).IsRequired().HasMaxLength(50);
     }
 }
