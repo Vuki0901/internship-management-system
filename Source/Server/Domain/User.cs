@@ -11,6 +11,7 @@ public class User : Entity
     public string? LastName { get; set; }
     public string? Password { get; private set; }
     public required string EmailAddress { get; set; }
+    public string? PersonalIdentificationNumber { get; set; }
     public string? FullName => string.IsNullOrEmpty(FirstName) || string.IsNullOrEmpty(LastName) ? null : $"{FirstName} {LastName}";
     public IEnumerable<UserRole> Roles => _roles;
     
