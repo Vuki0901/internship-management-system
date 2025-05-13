@@ -4,6 +4,7 @@ using InternshipManagementSystem.Persistency;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InternshipManagementSystem.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250513035558_4")]
+    partial class _4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,9 +37,6 @@ namespace InternshipManagementSystem.Migrations
                     b.Property<DateOnly?>("EndDate")
                         .HasColumnType("date");
 
-                    b.Property<Guid?>("InternshipProviderId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("MentorId")
                         .HasColumnType("uniqueidentifier");
 
@@ -53,8 +53,6 @@ namespace InternshipManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InternshipProviderId");
 
                     b.HasIndex("MentorId");
 
@@ -216,10 +214,6 @@ namespace InternshipManagementSystem.Migrations
 
             modelBuilder.Entity("InternshipManagementSystem.Domain.Internship", b =>
                 {
-                    b.HasOne("InternshipManagementSystem.Domain.InternshipProvider", "InternshipProvider")
-                        .WithMany()
-                        .HasForeignKey("InternshipProviderId");
-
                     b.HasOne("InternshipManagementSystem.Domain.Mentor", null)
                         .WithMany("Internships")
                         .HasForeignKey("MentorId");
@@ -227,8 +221,6 @@ namespace InternshipManagementSystem.Migrations
                     b.HasOne("InternshipManagementSystem.Domain.Student", null)
                         .WithMany("Internships")
                         .HasForeignKey("StudentId");
-
-                    b.Navigation("InternshipProvider");
                 });
 
             modelBuilder.Entity("InternshipManagementSystem.Domain.UserRole", b =>

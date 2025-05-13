@@ -12,6 +12,7 @@ public class DatabaseContext : DbContext
     public DbSet<UserRole> UserRoles { get; init; } = null!;
     public DbSet<Administrator> Administrators { get; set; } = null!;
     public DbSet<Mentor> Mentors { get; set; } = null!;
+    public DbSet<InternshipSupervisor> InternshipSupervisors { get; set; } = null!;
     public DbSet<Student> Students { get; set; } = null!;
     public DbSet<Internship> Internships { get; set; } = null!;
     public DbSet<InternshipProvider> InternshipProviders { get; set; } = null!;

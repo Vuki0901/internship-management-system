@@ -4,6 +4,7 @@ using InternshipManagementSystem.Persistency;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InternshipManagementSystem.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250512140601_2")]
+    partial class _2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,9 +37,6 @@ namespace InternshipManagementSystem.Migrations
                     b.Property<DateOnly?>("EndDate")
                         .HasColumnType("date");
 
-                    b.Property<Guid?>("InternshipProviderId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("MentorId")
                         .HasColumnType("uniqueidentifier");
 
@@ -54,8 +54,6 @@ namespace InternshipManagementSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InternshipProviderId");
-
                     b.HasIndex("MentorId");
 
                     b.HasIndex("StudentId");
@@ -68,9 +66,6 @@ namespace InternshipManagementSystem.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Address")
                         .HasMaxLength(4000)
@@ -183,18 +178,6 @@ namespace InternshipManagementSystem.Migrations
                     b.HasDiscriminator().HasValue("Administrator");
                 });
 
-            modelBuilder.Entity("InternshipManagementSystem.Domain.InternshipSupervisor", b =>
-                {
-                    b.HasBaseType("InternshipManagementSystem.Domain.UserRole");
-
-                    b.Property<string>("AcademicDegreeAbbreviation")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.HasDiscriminator().HasValue("InternshipSupervisor");
-                });
-
             modelBuilder.Entity("InternshipManagementSystem.Domain.Mentor", b =>
                 {
                     b.HasBaseType("InternshipManagementSystem.Domain.UserRole");
@@ -216,10 +199,6 @@ namespace InternshipManagementSystem.Migrations
 
             modelBuilder.Entity("InternshipManagementSystem.Domain.Internship", b =>
                 {
-                    b.HasOne("InternshipManagementSystem.Domain.InternshipProvider", "InternshipProvider")
-                        .WithMany()
-                        .HasForeignKey("InternshipProviderId");
-
                     b.HasOne("InternshipManagementSystem.Domain.Mentor", null)
                         .WithMany("Internships")
                         .HasForeignKey("MentorId");
@@ -227,8 +206,6 @@ namespace InternshipManagementSystem.Migrations
                     b.HasOne("InternshipManagementSystem.Domain.Student", null)
                         .WithMany("Internships")
                         .HasForeignKey("StudentId");
-
-                    b.Navigation("InternshipProvider");
                 });
 
             modelBuilder.Entity("InternshipManagementSystem.Domain.UserRole", b =>

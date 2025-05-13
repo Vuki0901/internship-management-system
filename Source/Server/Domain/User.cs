@@ -35,6 +35,7 @@ public class User : Entity
     }
     
     public void RemoveRole<TRole>() where TRole : UserRole => RemoveRole(typeof(TRole));
+    public void SetPassword(string password) => Password = HashPassword(password);
     public bool IsCorrectPassword(string password) => HashPassword(password) == Password;
     private static string HashPassword(string password) => BitConverter.ToString(SHA512.HashData(Encoding.UTF8.GetBytes(password))).Replace("-", string.Empty);
 }

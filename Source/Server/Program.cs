@@ -2,6 +2,8 @@
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
+using InternshipManagementSystem.Core.Interaction;
+using InternshipManagementSystem.Infrastructure.Auth;
 using InternshipManagementSystem.Infrastructure.Configurations;
 using InternshipManagementSystem.Persistency;
 using Microsoft.AspNetCore.Builder;
@@ -17,6 +19,11 @@ var connectionString = builder.Configuration.GetConnectionString("Database");
 var jwtConfiguration = jwtConfigurationSection.Get<JwtConfiguration>()!;
 
 builder.Services.AddDbContext<DatabaseContext>(o => o.UseSqlServer(connectionString));
+builder
+    .Services.AddOptions<JwtConfiguration>()
+    .Bind(jwtConfigurationSection)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 builder.Services.AddFastEndpoints()
     .SwaggerDocument(
@@ -29,7 +36,7 @@ builder.Services.AddFastEndpoints()
                 s.DocumentName = "Administration";
                 s.Description = "API for a project as a part of Software Engineering course on Faculty of Informatics and Digital Technologies, Rijeka.";
             };
-            o.AutoTagPathSegmentIndex = 2;
+            o.AutoTagPathSegmentIndex = 1;
         }
     );
 builder.Services.AddAuthorization();
@@ -64,19 +71,13 @@ app.UseFastEndpoints(
     {
         c.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
         c.Endpoints.RoutePrefix = "api";
-        // c.Errors.ResponseBuilder = (failures, _, _) =>
-        // {
-        //     return new BaseResponse(
-        //         failures.GroupBy(f => f.PropertyName)
-        //             .ToDictionary(
-        //                 keySelector: e => e.Key,
-        //                 elementSelector: e => e.Select(m => m.ErrorMessage).ToArray()
-        //             )
-        //     );
-        // };
+        c.Errors.ProducesMetadataType = typeof(Response<object?>);
+        c.Errors.ResponseBuilder = (failures, _, _) =>
+            new Response<object?>(failures.Select(f => new ErrorDetail { Code = f.ErrorCode, Message = f.ErrorMessage }));
     }
 );
 app.UseSwaggerGen();
 app.UseCors();
+app.UseAuthenticatedUserSetter();
 
 app.Run();

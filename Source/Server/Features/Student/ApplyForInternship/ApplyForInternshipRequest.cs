@@ -16,13 +16,13 @@ public sealed class ApplyForInternshipRequest
         public Validator()
         {
             RuleFor(r => r.InternshipProviderId)
-                .NotEmpty().WithError(Errors.InternshipProviderIdIsRequired);
+                .NotEmpty().WithError(ErrorDefinitions.InternshipProviderIdIsRequired);
 
             RuleFor(r => r.DesiredStartDate)
-                .NotEmpty().WithError(Errors.InternshipDesiredStartDateIsRequired);
+                .NotEmpty().WithError(ErrorDefinitions.InternshipDesiredStartDateIsRequired);
 
             RuleFor(r => r.StudyLevel)
-                .NotEmpty().WithError(Errors.InternshipStudyLevelIsRequired);
+                .NotEmpty().WithError(ErrorDefinitions.InternshipStudyLevelIsRequired);
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using FastEndpoints;
 using InternshipManagementSystem.Core.Extensions;
-using InternshipManagementSystem.Domain;
+using InternshipManagementSystem.Features.Student.GetInternships;
 using InternshipManagementSystem.Persistency;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace InternshipManagementSystem.Features.Student.GetInternships;
+namespace InternshipManagementSystem.Features.Mentor.GetInternships;
 
 public class GetInternshipsEndpoint : EndpointWithoutRequest<GetInternshipsResult>
 {
@@ -15,15 +14,15 @@ public class GetInternshipsEndpoint : EndpointWithoutRequest<GetInternshipsResul
 
     public override void Configure()
     {
-        Get("/students/internships");
-        Roles(nameof(Student));
+        Get("/mentors/internships");
+        Roles(nameof(Mentor));
     }
 
     public override async Task HandleAsync(CancellationToken cancellationToken)
     {
-        var student = HttpContext.GetAuthenticatedStudent();
+        var mentor = HttpContext.GetAuthenticatedMentor();
         
-        var internships = await _databaseContext.Internships.Where(i => i.StudentId == student!.Id).OrderBy(i => i.CreatedOn)
+        var internships = await _databaseContext.Internships.Where(i => i.MentorId == mentor!.Id).OrderBy(i => i.CreatedOn)
             .Select(i => new GetInternshipsResult.InternshipInformation()
             {
                 Id = i.Id,
