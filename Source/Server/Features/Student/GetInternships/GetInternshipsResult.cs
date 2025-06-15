@@ -13,5 +13,16 @@ public class GetInternshipsResult
         public DateOnly? EndDate { get; set; }
         public InternshipStatus Status { get; set; }
         public StudyLevel StudyLevel { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public InternshipProviderInfo? InternshipProvider { get; set; }
+    }
+
+    public sealed class InternshipProviderInfo
+    {
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
+        public string? Address { get; set; }
+        public string? ContactEmailAddress { get; set; }
+        public string? ContactPhoneNumber { get; set; }
     }
 }

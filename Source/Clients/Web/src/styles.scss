@@ -1,0 +1,29 @@
+@use './assets/layout/layout.scss';
+@use 'primeicons/primeicons.css';
+@use './assets/demo/demo.scss';
+
+/* Global Roboto Font Application */
+:root {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --primary-color: #15324C;
+  --primary-dark: #0f2538;
+  --primary-light: #1f4661;
+}
+
+* {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+p, span, div, button, input, textarea, select, label {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}

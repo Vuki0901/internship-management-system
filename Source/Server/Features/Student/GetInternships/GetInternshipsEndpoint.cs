@@ -23,7 +23,10 @@ public class GetInternshipsEndpoint : EndpointWithoutRequest<GetInternshipsResul
     {
         var student = HttpContext.GetAuthenticatedStudent();
         
-        var internships = await _databaseContext.Internships.Where(i => i.StudentId == student!.Id).OrderBy(i => i.CreatedOn)
+        var internships = await _databaseContext.Internships
+            .Include(i => i.InternshipProvider)
+            .Where(i => i.StudentId == student!.Id)
+            .OrderBy(i => i.CreatedOn)
             .Select(i => new GetInternshipsResult.InternshipInformation()
             {
                 Id = i.Id,
@@ -31,6 +34,15 @@ public class GetInternshipsEndpoint : EndpointWithoutRequest<GetInternshipsResul
                 EndDate = i.EndDate,
                 Status = i.Status,
                 StudyLevel = i.StudyLevel,
+                CreatedOn = i.CreatedOn,
+                InternshipProvider = i.InternshipProvider != null ? new GetInternshipsResult.InternshipProviderInfo
+                {
+                    Id = i.InternshipProvider.Id,
+                    Name = i.InternshipProvider.Name,
+                    Address = i.InternshipProvider.Address,
+                    ContactEmailAddress = i.InternshipProvider.ContactEmailAddress,
+                    ContactPhoneNumber = i.InternshipProvider.ContactPhoneNumber
+                } : null
             }).ToListAsync(cancellationToken);
         
         await SendAsync(new GetInternshipsResult {Internships = internships}, cancellation: cancellationToken);

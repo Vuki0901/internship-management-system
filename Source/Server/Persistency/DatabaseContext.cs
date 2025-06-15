@@ -16,6 +16,9 @@ public class DatabaseContext : DbContext
     public DbSet<Student> Students { get; set; } = null!;
     public DbSet<Internship> Internships { get; set; } = null!;
     public DbSet<InternshipProvider> InternshipProviders { get; set; } = null!;
+    public DbSet<InternshipLog> InternshipLogs { get; set; } = null!;
+    public DbSet<InternshipReport> InternshipReports { get; set; } = null!;
+    public DbSet<Document> Documents { get; set; } = null!;
     
     protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
     

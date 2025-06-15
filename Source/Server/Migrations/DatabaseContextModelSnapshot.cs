@@ -22,6 +22,46 @@ namespace InternshipManagementSystem.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("InternshipManagementSystem.Domain.Document", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentBase64")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UploadedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UploadedBy");
+
+                    b.ToTable("Documents");
+                });
+
             modelBuilder.Entity("InternshipManagementSystem.Domain.Internship", b =>
                 {
                     b.Property<Guid>("Id")
@@ -63,6 +103,52 @@ namespace InternshipManagementSystem.Migrations
                     b.ToTable("Internships");
                 });
 
+            modelBuilder.Entity("InternshipManagementSystem.Domain.InternshipLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("InternshipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Location")
+                        .HasColumnType("int");
+
+                    b.Property<double>("NumberOfWorkingHours")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InternshipId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("InternshipLogs");
+                });
+
             modelBuilder.Entity("InternshipManagementSystem.Domain.InternshipProvider", b =>
                 {
                     b.Property<Guid>("Id")
@@ -98,6 +184,45 @@ namespace InternshipManagementSystem.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("InternshipProviders");
+                });
+
+            modelBuilder.Entity("InternshipManagementSystem.Domain.InternshipReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("Grade")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("InternshipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsConfirmedByMentor")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MentorContent")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<double>("TotalHoursWorked")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TotalLogEntries")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InternshipId");
+
+                    b.ToTable("InternshipReports");
                 });
 
             modelBuilder.Entity("InternshipManagementSystem.Domain.User", b =>
@@ -214,6 +339,17 @@ namespace InternshipManagementSystem.Migrations
                     b.HasDiscriminator().HasValue("Student");
                 });
 
+            modelBuilder.Entity("InternshipManagementSystem.Domain.Document", b =>
+                {
+                    b.HasOne("InternshipManagementSystem.Domain.User", "UploadedByUser")
+                        .WithMany()
+                        .HasForeignKey("UploadedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UploadedByUser");
+                });
+
             modelBuilder.Entity("InternshipManagementSystem.Domain.Internship", b =>
                 {
                     b.HasOne("InternshipManagementSystem.Domain.InternshipProvider", "InternshipProvider")
@@ -229,6 +365,32 @@ namespace InternshipManagementSystem.Migrations
                         .HasForeignKey("StudentId");
 
                     b.Navigation("InternshipProvider");
+                });
+
+            modelBuilder.Entity("InternshipManagementSystem.Domain.InternshipLog", b =>
+                {
+                    b.HasOne("InternshipManagementSystem.Domain.Internship", "Internship")
+                        .WithMany()
+                        .HasForeignKey("InternshipId");
+
+                    b.HasOne("InternshipManagementSystem.Domain.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId");
+
+                    b.Navigation("Internship");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("InternshipManagementSystem.Domain.InternshipReport", b =>
+                {
+                    b.HasOne("InternshipManagementSystem.Domain.Internship", "Internship")
+                        .WithMany()
+                        .HasForeignKey("InternshipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Internship");
                 });
 
             modelBuilder.Entity("InternshipManagementSystem.Domain.UserRole", b =>

@@ -27,10 +27,10 @@ public class SetInternshipSupervisorRoleEndpoint : Endpoint<SetInternshipSupervi
         if (user == null)
             ErrorSender.SendError(ErrorDefinitions.UserDoesNotExist);
 
-        if (user.Is<InternshipSupervisor>())
+        if (user.Is<Domain.InternshipSupervisor>())
             ErrorSender.SendError(ErrorDefinitions.UserIsAlreadyInternshipSupervisor);
 
-        var internshipSupervisor = new InternshipSupervisor { Active = true };
+        var internshipSupervisor = new Domain.InternshipSupervisor { Active = true, AcademicDegreeAbbreviation = request.AcademicDegreeAbbreviation};
         user.AddRole(internshipSupervisor);
 
         _databaseContext.Add(internshipSupervisor);

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -11,6 +11,8 @@
       <PackageReference Include="FastEndpoints" Version="6.0.0" />
       <PackageReference Include="FastEndpoints.Security" Version="6.0.0" />
       <PackageReference Include="FastEndpoints.Swagger" Version="6.0.0" />
+      <PackageReference Include="iText7" Version="9.2.0" />
+      <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.2.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
         <PrivateAssets>all</PrivateAssets>
@@ -21,13 +23,6 @@
 
     <ItemGroup>
       <Folder Include="Persistency\Migrations\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="appsettings.json" />
-      <Content Include="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
 </Project>

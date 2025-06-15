@@ -57,16 +57,28 @@ public sealed class RegisterEndpoint : Endpoint<RegisterRequest, RegisterResult>
         {
             o.SigningKey = _jwtConfiguration.SigningKey;
             o.ExpireAt = DateTime.Now.AddDays(10);
-            o.User.Claims.Add(
-                new Claim[]
-                {
-                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new(nameof(user.Id), user.Id.ToString()),
-                    new(nameof(user.FullName), user.FullName ?? user.EmailAddress),
-                    new(nameof(user.EmailAddress), user.EmailAddress),
-                    new(nameof(user.Roles), string.Join(",", roles))
-                }
-            );
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(nameof(user.Id), user.Id.ToString()),
+                new(nameof(user.FullName), user.FullName ?? user.EmailAddress),
+                new(nameof(user.EmailAddress), user.EmailAddress)
+            };
+            
+            // Add each role as a separate claim to ensure it's always an array
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim("Roles", role)); // Custom claim for frontend compatibility
+            }
+            
+            // Add a dummy claim to force array behavior when there's only one role
+            if (roles.Count == 1)
+            {
+                claims.Add(new Claim("Roles", "")); // Empty dummy claim to force array
+            }
+            
+            o.User.Claims.Add(claims.ToArray());
             o.User.Roles.AddRange(roles);
         });
         

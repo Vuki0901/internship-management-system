@@ -33,7 +33,8 @@ public class CreateInternshipProviderEndpoint : Endpoint<CreateInternshipProvide
             PersonalIdentificationNumber = request.PersonalIdentificationNumber,
             Address = request.Address,
             ContactEmailAddress = request.ContactEmailAddress,
-            ContactPhoneNumber = request.ContactPhoneNumber
+            ContactPhoneNumber = request.ContactPhoneNumber,
+            Active = true
         };
         
         await _databaseContext.InternshipProviders.AddAsync(internshipProvider, cancellationToken);
