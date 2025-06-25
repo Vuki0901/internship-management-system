@@ -15,6 +15,17 @@ interface LoginResult {
   token: string;
 }
 
+interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  password: string;
+}
+
+interface RegisterResult {
+  token: string;
+}
+
 interface DecodedToken {
   role?: string[];
   Roles?: string[];
@@ -62,6 +73,23 @@ export class AuthService {
       }),
       catchError(error => {
         console.error('Login failed:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  register(request: RegisterRequest): Observable<RegisterResult> {
+    const endpoint = `${this.API_BASE_URL}/students/register`;
+
+    return this.http.post<RegisterResult>(endpoint, request).pipe(
+      tap(response => {
+        if (response && response.token) {
+          this.setToken(response.token);
+          this.router.navigate(['/student/dashboard']);
+        }
+      }),
+      catchError(error => {
+        console.error('Registration failed:', error);
         return throwError(() => error);
       })
     );

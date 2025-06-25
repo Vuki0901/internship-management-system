@@ -80,6 +80,9 @@ import { ToastModule } from 'primeng/toast';
               </div>
               <button type="submit" class="student-login-button">Prijava</button>
             </form>
+            <div class="register-link">
+              <p>Nemate račun? <a (click)="goToRegister()" class="register-link-btn">Registrirajte se</a></p>
+            </div>
           </div>
         </div>
       } @else {
@@ -284,6 +287,27 @@ import { ToastModule } from 'primeng/toast';
       background-color: var(--primary-dark);
     }
 
+    .register-link {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .register-link p {
+      margin: 0;
+    }
+
+    .register-link-btn {
+      color: var(--primary-color);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .register-link-btn:hover {
+      text-decoration: underline;
+    }
+
     /* Styles for Other Roles Login (Figma design) */
     .other-roles-login-container {
       display: flex;
@@ -442,5 +466,9 @@ export class LoginComponent implements OnInit {
     if (route) {
       this.router.navigate([route]);
     }
+  }
+
+  goToRegister() {
+    this.router.navigate(['/student/register']);
   }
 } 

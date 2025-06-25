@@ -7,6 +7,7 @@ import { AdminGuard } from './shared/auth/admin.guard';
 import { StudentGuard } from './shared/auth/student.guard';
 import { MentorGuard } from './shared/auth/mentor.guard';
 import { SupervisorGuard } from './shared/auth/supervisor.guard';
+import { StudentRegisterComponent } from './students/register/register.component';
 
 export const routes: Routes = [
   {
@@ -18,6 +19,10 @@ export const routes: Routes = [
     path: 'student/login',
     component: LoginComponent,
     data: { role: 'Student' }
+  },
+  {
+    path: 'student/register',
+    component: StudentRegisterComponent
   },
   {
     path: 'admin/login',

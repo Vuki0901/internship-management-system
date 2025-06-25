@@ -12,6 +12,7 @@ using iText.Kernel.Colors;
 using iText.Layout.Borders;
 using iText.Kernel.Font;
 using iText.IO.Font.Constants;
+using iText.IO.Font;
 using Document = iText.Layout.Document;
 
 namespace InternshipManagementSystem.Features.Mentor.DownloadInternshipReportPdf;
@@ -97,9 +98,22 @@ public class DownloadInternshipReportPdfEndpoint : Endpoint<DownloadInternshipRe
         var internship = report.Internship!;
         var provider = internship.InternshipProvider;
 
-        // Create fonts
-        var regularFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
-        var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+        // Create fonts with Croatian character support
+        PdfFont regularFont;
+        PdfFont boldFont;
+        
+        try
+        {
+            // Try to use Arial (supports Croatian characters) with embedding
+            regularFont = PdfFontFactory.CreateFont("Arial", PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
+            boldFont = PdfFontFactory.CreateFont("Arial Bold", PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
+        }
+        catch
+        {
+            // Fallback to standard fonts with appropriate encoding
+            regularFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA, PdfEncodings.CP1250);
+            boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD, PdfEncodings.CP1250);
+        }
 
         // Title
         var titleText = new Text("IZVJEŠTAJ O PRAKSI").SetFont(boldFont);
