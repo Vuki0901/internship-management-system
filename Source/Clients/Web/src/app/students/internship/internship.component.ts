@@ -11,7 +11,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
 import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogStatus, CreateInternshipLogRequest, UpdateInternshipLogRequest } from '../services/internship-log.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-student-internship',
@@ -27,31 +29,32 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
     SelectModule,
     DatePickerModule,
     CheckboxModule,
-    ToastModule
+    ToastModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Moja praksa</h1>
+        <h1>{{ 'student.internship.title' | translate }}</h1>
       </header>
 
       <div class="content-card">
         <div class="diary-section">
           <div class="section-header">
-            <h2>Dnevnik prakse</h2>
+            <h2>{{ 'student.internship.diary' | translate }}</h2>
             <div class="header-controls">
               <div class="search-container">
                 <i class="pi pi-search search-icon"></i>
                                  <input 
                    type="text" 
-                   placeholder="Pretraži"
+                   [placeholder]="'student.internship.search_placeholder' | translate"
                    class="search-input"
                    [(ngModel)]="searchText"
                    (ngModelChange)="filterLogEntries()">
               </div>
               <p-button 
-                label="Dodaj dan"
+                [label]="'student.internship.add_day' | translate"
                 icon="pi pi-plus"
                 [style]="{'background-color': 'var(--primary-color)', 'border-color': 'var(--primary-color)'}"
                 (onClick)="openLogDialog()">
@@ -73,11 +76,11 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
                     [binary]="true">
                   </p-checkbox>
                 </th>
-                <th style="min-width: 10rem">Datum</th>
-                <th style="min-width: 8rem">Radni sati</th>
-                <th style="min-width: 10rem">Lokacija</th>
-                <th style="min-width: 8rem">Status</th>
-                <th style="width: 12rem">Akcije</th>
+                <th style="min-width: 10rem">{{ 'student.internship.date' | translate }}</th>
+                <th style="min-width: 8rem">{{ 'student.internship.working_hours' | translate }}</th>
+                <th style="min-width: 10rem">{{ 'student.internship.location' | translate }}</th>
+                <th style="min-width: 8rem">{{ 'student.internship.status' | translate }}</th>
+                <th style="width: 12rem">{{ 'student.internship.actions' | translate }}</th>
               </tr>
             </ng-template>
 
@@ -153,7 +156,7 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
             <ng-template pTemplate="emptymessage">
               <tr>
                 <td colspan="6" class="text-center">
-                  Nema unesenih zapisa u dnevnik.
+                  {{ 'student.internship.no_entries' | translate }}
                 </td>
               </tr>
             </ng-template>
@@ -163,7 +166,7 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
 
       <!-- Log Entry Dialog -->
       <p-dialog 
-        [header]="editingLog ? 'Uredi dan' : 'Dodaj dan'"
+        [header]="editingLog ? ('student.internship.edit_day' | translate) : ('student.internship.add_day_dialog' | translate)"
         [(visible)]="showDialog" 
         [modal]="true"
         [style]="{width: '600px'}"
@@ -182,12 +185,12 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
           <form (ngSubmit)="saveLogEntry()" class="log-form">
             <div class="form-row">
               <div class="form-group">
-                <label>Radni sati</label>
+                <label>{{ 'student.internship.working_hours_label' | translate }}</label>
                 <p-select
                   [options]="workingHoursOptions"
                   [(ngModel)]="logForm.numberOfWorkingHours"
                   name="workingHours"
-                  placeholder="Radni sati"
+                  [placeholder]="'student.internship.working_hours_label' | translate"
                   optionLabel="label"
                   optionValue="value"
                   [style]="{'width': '100%'}">
@@ -195,12 +198,12 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
               </div>
               
               <div class="form-group">
-                <label>Lokacija</label>
+                <label>{{ 'student.internship.location_label' | translate }}</label>
                 <p-select
                   [options]="locationOptions"
                   [(ngModel)]="logForm.location"
                   name="location"
-                  placeholder="Lokacija"
+                  [placeholder]="'student.internship.location_label' | translate"
                   optionLabel="label"
                   optionValue="value"
                   [style]="{'width': '100%'}">
@@ -210,12 +213,12 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
 
             <div class="form-row">
               <div class="form-group">
-                <label>Status</label>
+                <label>{{ 'student.internship.status' | translate }}</label>
                 <p-select
                   [options]="statusOptions"
                   [(ngModel)]="logForm.status"
                   name="status"
-                  placeholder="Status"
+                  [placeholder]="'student.internship.status' | translate"
                   optionLabel="label"
                   optionValue="value"
                   [style]="{'width': '100%'}">
@@ -227,9 +230,9 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
             </div>
 
             <div class="form-group">
-              <h3>Opis aktivnosti</h3>
+              <h3>{{ 'student.internship.activity_description' | translate }}</h3>
               <textarea
-                placeholder="Unesite opis zadataka koje ste obavljali taj dan"
+                [placeholder]="'student.internship.activity_placeholder' | translate"
                 [(ngModel)]="logForm.description"
                 name="description"
                 class="activity-textarea"
@@ -238,9 +241,9 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
             </div>
 
             <div class="form-group">
-              <h3>Problemi i izazovi</h3>
+              <h3>{{ 'student.internship.problems_challenges' | translate }}</h3>
               <textarea
-                placeholder="Unesite opis problema i izazova s kojima ste se susreli te na koji način ste ih riješili"
+                [placeholder]="'student.internship.problems_placeholder' | translate"
                 [(ngModel)]="logForm.feedback"
                 name="feedback"
                 class="feedback-textarea"
@@ -250,14 +253,14 @@ import { InternshipLogService, InternshipLogEntry, WorkLocation, InternshipLogSt
 
             <div class="dialog-actions">
               <p-button 
-                label="Predaj"
+                [label]="'student.internship.submit' | translate"
                 type="button"
                 severity="secondary"
                 [outlined]="true"
                 (onClick)="submitLogEntry()">
               </p-button>
               <p-button 
-                label="Spremi"
+                [label]="'student.internship.save' | translate"
                 type="submit"
                 [style]="{'background-color': '#007bff', 'border-color': '#007bff'}">
               </p-button>
@@ -611,11 +614,39 @@ export class StudentInternshipComponent implements OnInit {
 
   constructor(
     private internshipLogService: InternshipLogService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
+    this.initializeOptions();
     this.loadLogEntries();
+  }
+
+  private initializeOptions(): void {
+    this.workingHoursOptions = [
+      { label: this.translationService.instant('student.internship.hours_1'), value: 1 },
+      { label: this.translationService.instant('student.internship.hours_2'), value: 2 },
+      { label: this.translationService.instant('student.internship.hours_3'), value: 3 },
+      { label: this.translationService.instant('student.internship.hours_4'), value: 4 },
+      { label: this.translationService.instant('student.internship.hours_5'), value: 5 },
+      { label: this.translationService.instant('student.internship.hours_6'), value: 6 },
+      { label: this.translationService.instant('student.internship.hours_7'), value: 7 },
+      { label: this.translationService.instant('student.internship.hours_8'), value: 8 }
+    ];
+
+    this.locationOptions = [
+      { label: this.translationService.instant('student.internship.location_office'), value: WorkLocation.Onsite },
+      { label: this.translationService.instant('student.internship.location_home'), value: WorkLocation.Remote },
+      { label: this.translationService.instant('student.internship.location_field'), value: WorkLocation.Field }
+    ];
+
+    this.statusOptions = [
+      { label: this.translationService.instant('student.internship.status_working'), value: InternshipLogStatus.InProgress },
+      { label: this.translationService.instant('student.internship.status_complete'), value: InternshipLogStatus.Complete },
+      { label: this.translationService.instant('student.internship.status_unfinished'), value: InternshipLogStatus.Unfinished }
+    ];
   }
 
   loadLogEntries(): void {
@@ -627,6 +658,11 @@ export class StudentInternshipComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('student.internship.load_error')
+        });
         this.loading = false;
       }
     });
@@ -681,8 +717,8 @@ export class StudentInternshipComponent implements OnInit {
     if (!this.logForm.numberOfWorkingHours || this.logForm.location === undefined || this.logForm.status === undefined) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Upozorenje',
-        detail: 'Molimo unesite sve potrebne podatke.'
+        summary: this.translationService.instant('common.warning'),
+        detail: this.translationService.instant('common.required_fields')
       });
       return;
     }
@@ -707,8 +743,8 @@ export class StudentInternshipComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Zapis je uspješno ažuriran.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('student.internship.save_success')
           });
           this.loadLogEntries();
           this.closeDialog();
@@ -720,8 +756,8 @@ export class StudentInternshipComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Novi zapis je uspješno kreiran.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('student.internship.save_success')
           });
           this.loadLogEntries();
           this.closeDialog();
@@ -744,8 +780,8 @@ export class StudentInternshipComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Obrisano',
-          detail: 'Zapis je uspješno obrisan.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('student.internship.delete_success')
         });
         this.loadLogEntries();
       }
@@ -793,17 +829,17 @@ export class StudentInternshipComponent implements OnInit {
     // Handle both string enum values from server and numeric enum values
     if (typeof location === 'string') {
       switch (location) {
-        case 'Onsite': return 'Ured';
-        case 'Remote': return 'Od kuće';
-        case 'Field': return 'Teren';
-        default: return 'Nepoznato';
+        case 'Onsite': return this.translationService.instant('student.internship.location_office');
+        case 'Remote': return this.translationService.instant('student.internship.location_home');
+        case 'Field': return this.translationService.instant('student.internship.location_field');
+        default: return this.translationService.instant('common.unknown');
       }
     } else {
       switch (location) {
-        case WorkLocation.Onsite: return 'Ured';
-        case WorkLocation.Remote: return 'Od kuće';
-        case WorkLocation.Field: return 'Teren';
-        default: return 'Nepoznato';
+        case WorkLocation.Onsite: return this.translationService.instant('student.internship.location_office');
+        case WorkLocation.Remote: return this.translationService.instant('student.internship.location_home');
+        case WorkLocation.Field: return this.translationService.instant('student.internship.location_field');
+        default: return this.translationService.instant('common.unknown');
       }
     }
   }
@@ -812,17 +848,17 @@ export class StudentInternshipComponent implements OnInit {
     // Handle both string enum values from server and numeric enum values
     if (typeof status === 'string') {
       switch (status) {
-        case 'Complete': return 'Obraden';
-        case 'InProgress': return 'U tijeku';
-        case 'Unfinished': return 'Neobavljen';
-        default: return 'Nepoznato';
+        case 'Complete': return this.translationService.instant('student.internship.status_complete');
+        case 'InProgress': return this.translationService.instant('student.internship.status_working');
+        case 'Unfinished': return this.translationService.instant('student.internship.status_unfinished');
+        default: return this.translationService.instant('common.unknown');
       }
     } else {
       switch (status) {
-        case InternshipLogStatus.Complete: return 'Obraden';
-        case InternshipLogStatus.InProgress: return 'U tijeku';
-        case InternshipLogStatus.Unfinished: return 'Neobavljen';
-        default: return 'Nepoznato';
+        case InternshipLogStatus.Complete: return this.translationService.instant('student.internship.status_complete');
+        case InternshipLogStatus.InProgress: return this.translationService.instant('student.internship.status_working');
+        case InternshipLogStatus.Unfinished: return this.translationService.instant('student.internship.status_unfinished');
+        default: return this.translationService.instant('common.unknown');
       }
     }
   }

@@ -9,8 +9,10 @@ import { ChipModule } from 'primeng/chip';
 import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { AdministrationService, DashboardStatistics, RecentActivity } from '../services/administration.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -24,14 +26,15 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
     ChipModule,
     DividerModule,
     ToastModule,
-    SkeletonModule
+    SkeletonModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h1>Administrator Dashboard</h1>
-        <p>Pregled sustava upravljanja praksama - statistike i upravljanje</p>
+        <h1>{{ 'admin.dashboard.title' | translate }}</h1>
+        <p>{{ 'admin.dashboard.subtitle' | translate }}</p>
       </div>
 
       <!-- Loading State -->
@@ -48,10 +51,10 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
         <p-card>
           <div class="error-state">
             <i class="pi pi-exclamation-triangle error-icon"></i>
-            <h3>Greška pri dohvaćanju podataka</h3>
+            <h3>{{ 'admin.dashboard.data_fetch_error' | translate }}</h3>
             <p>{{ error }}</p>
             <p-button 
-              label="Pokušaj ponovno"
+              [label]="'common.try_again' | translate"
               icon="pi pi-refresh"
               severity="primary"
               (onClick)="loadDashboardData()">
@@ -61,7 +64,7 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
       } @else if (statistics) {
         
         <!-- User Statistics -->
-        <p-card header="Korisnici sustava" [style]="{'margin-bottom': '1.5rem'}">
+        <p-card [header]="'admin.dashboard.user_statistics' | translate" [style]="{'margin-bottom': '1.5rem'}">
           <div class="stats-grid">
             <div class="stat-card primary">
               <div class="stat-icon">
@@ -69,8 +72,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.totalUsers }}</div>
-                <div class="stat-label">Ukupno korisnika</div>
-                <div class="stat-sublabel">Svi registrirani korisnici</div>
+                <div class="stat-label">{{ 'admin.dashboard.total_users' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.all_registered_users' | translate }}</div>
               </div>
             </div>
 
@@ -80,8 +83,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.totalStudents }}</div>
-                <div class="stat-label">Studenti</div>
-                <div class="stat-sublabel">Registrirani studenti</div>
+                <div class="stat-label">{{ 'admin.dashboard.students' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.registered_students' | translate }}</div>
               </div>
             </div>
 
@@ -91,8 +94,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.totalMentors }}</div>
-                <div class="stat-label">Mentori</div>
-                <div class="stat-sublabel">Aktivni mentori</div>
+                <div class="stat-label">{{ 'admin.dashboard.mentors' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.active_mentors' | translate }}</div>
               </div>
             </div>
 
@@ -102,8 +105,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.totalSupervisors }}</div>
-                <div class="stat-label">Voditelji</div>
-                <div class="stat-sublabel">Voditelji praksi</div>
+                <div class="stat-label">{{ 'admin.dashboard.supervisors' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.internship_supervisors' | translate }}</div>
               </div>
             </div>
 
@@ -113,15 +116,15 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.totalAdministrators }}</div>
-                <div class="stat-label">Administratori</div>
-                <div class="stat-sublabel">Sistemski administratori</div>
+                <div class="stat-label">{{ 'admin.dashboard.administrators' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.system_administrators' | translate }}</div>
               </div>
             </div>
           </div>
         </p-card>
 
         <!-- Internship Statistics -->
-        <p-card header="Prakse" [style]="{'margin-bottom': '1.5rem'}">
+        <p-card [header]="'admin.dashboard.internships' | translate" [style]="{'margin-bottom': '1.5rem'}">
           <div class="stats-grid">
             <div class="stat-card primary">
               <div class="stat-icon">
@@ -129,8 +132,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.totalInternships }}</div>
-                <div class="stat-label">Ukupno praksi</div>
-                <div class="stat-sublabel">Sve prijave za prakse</div>
+                <div class="stat-label">{{ 'admin.dashboard.total_internships' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.all_internship_applications' | translate }}</div>
               </div>
             </div>
 
@@ -140,8 +143,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.pendingInternships }}</div>
-                <div class="stat-label">Na čekanju</div>
-                <div class="stat-sublabel">Čekaju odobrenje</div>
+                <div class="stat-label">{{ 'admin.dashboard.pending' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.waiting_approval' | translate }}</div>
               </div>
             </div>
 
@@ -151,8 +154,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.acceptedInternships }}</div>
-                <div class="stat-label">Prihvaćene</div>
-                <div class="stat-sublabel">Odobrene prakse</div>
+                <div class="stat-label">{{ 'admin.dashboard.accepted' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.approved_internships' | translate }}</div>
               </div>
             </div>
 
@@ -162,8 +165,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.inProgressInternships }}</div>
-                <div class="stat-label">U tijeku</div>
-                <div class="stat-sublabel">Aktivne prakse</div>
+                <div class="stat-label">{{ 'admin.dashboard.in_progress' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.active_internships' | translate }}</div>
               </div>
             </div>
 
@@ -173,8 +176,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.completedInternships }}</div>
-                <div class="stat-label">Završene</div>
-                <div class="stat-sublabel">Uspješno završene</div>
+                <div class="stat-label">{{ 'admin.dashboard.completed' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.successfully_completed' | translate }}</div>
               </div>
             </div>
 
@@ -184,8 +187,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ statistics.rejectedInternships }}</div>
-                <div class="stat-label">Odbačene</div>
-                <div class="stat-sublabel">Neodobrene prakse</div>
+                <div class="stat-label">{{ 'admin.dashboard.rejected' | translate }}</div>
+                <div class="stat-sublabel">{{ 'admin.dashboard.unapproved_internships' | translate }}</div>
               </div>
             </div>
           </div>
@@ -193,7 +196,7 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
 
         <!-- Provider and Report Statistics -->
         <div class="two-column-grid">
-          <p-card header="Ponuditelji praksi" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'admin.dashboard.internship_providers' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="stats-grid">
               <div class="stat-card primary">
                 <div class="stat-icon">
@@ -201,8 +204,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ statistics.totalInternshipProviders }}</div>
-                  <div class="stat-label">Ukupno ponuditelja</div>
-                  <div class="stat-sublabel">Registrirane tvrtke</div>
+                  <div class="stat-label">{{ 'admin.dashboard.total_providers' | translate }}</div>
+                  <div class="stat-sublabel">{{ 'admin.dashboard.registered_companies' | translate }}</div>
                 </div>
               </div>
 
@@ -212,14 +215,14 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ statistics.activeInternshipProviders }}</div>
-                  <div class="stat-label">Aktivni ponuditelji</div>
-                  <div class="stat-sublabel">Trenutno aktivni</div>
+                  <div class="stat-label">{{ 'admin.dashboard.active_providers' | translate }}</div>
+                  <div class="stat-sublabel">{{ 'admin.dashboard.currently_active' | translate }}</div>
                 </div>
               </div>
             </div>
           </p-card>
 
-          <p-card header="Izvještaji" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'admin.dashboard.reports' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="stats-grid">
               <div class="stat-card primary">
                 <div class="stat-icon">
@@ -227,8 +230,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ statistics.totalReports }}</div>
-                  <div class="stat-label">Ukupno izvještaja</div>
-                  <div class="stat-sublabel">Svi predani izvještaji</div>
+                  <div class="stat-label">{{ 'admin.dashboard.total_reports' | translate }}</div>
+                  <div class="stat-sublabel">{{ 'admin.dashboard.all_submitted_reports' | translate }}</div>
                 </div>
               </div>
 
@@ -238,8 +241,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ statistics.pendingReports }}</div>
-                  <div class="stat-label">Na čekanju</div>
-                  <div class="stat-sublabel">Čekaju ocjenu</div>
+                  <div class="stat-label">{{ 'admin.dashboard.pending_reports' | translate }}</div>
+                  <div class="stat-sublabel">{{ 'admin.dashboard.awaiting_grade' | translate }}</div>
                 </div>
               </div>
 
@@ -249,8 +252,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ statistics.gradedReports }}</div>
-                  <div class="stat-label">Ocijenjeni</div>
-                  <div class="stat-sublabel">Ocijenjeni izvještaji</div>
+                  <div class="stat-label">{{ 'admin.dashboard.graded_reports' | translate }}</div>
+                  <div class="stat-sublabel">{{ 'admin.dashboard.graded_reports_desc' | translate }}</div>
                 </div>
               </div>
 
@@ -260,8 +263,8 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ statistics.confirmedReports }}</div>
-                  <div class="stat-label">Potvrđeni</div>
-                  <div class="stat-sublabel">Finalizirani izvještaji</div>
+                  <div class="stat-label">{{ 'admin.dashboard.confirmed_reports' | translate }}</div>
+                  <div class="stat-sublabel">{{ 'admin.dashboard.finalized_reports' | translate }}</div>
                 </div>
               </div>
             </div>
@@ -269,10 +272,10 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
         </div>
 
         <!-- Quick Actions -->
-        <p-card header="Brze akcije" [style]="{'margin-bottom': '1.5rem'}">
+        <p-card [header]="'admin.dashboard.quick_actions' | translate" [style]="{'margin-bottom': '1.5rem'}">
           <div class="quick-actions">
             <p-button 
-              label="Upravljanje korisnicima"
+              [label]="'admin.dashboard.user_management' | translate"
               icon="pi pi-users"
               severity="primary"
               [outlined]="true"
@@ -280,7 +283,7 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               [style]="{'margin-right': '1rem', 'margin-bottom': '0.5rem'}">
             </p-button>
             <p-button 
-              label="Ponuditelji praksi"
+              [label]="'admin.dashboard.provider_management' | translate"
               icon="pi pi-building"
               severity="secondary"
               [outlined]="true"
@@ -288,7 +291,7 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
               [style]="{'margin-right': '1rem', 'margin-bottom': '0.5rem'}">
             </p-button>
             <p-button 
-              label="Dokumenti"
+              [label]="'admin.dashboard.document_management' | translate"
               icon="pi pi-file"
               severity="info"
               [outlined]="true"
@@ -300,7 +303,7 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
 
         <!-- Recent Activity -->
         @if (statistics.recentActivities && statistics.recentActivities.length > 0) {
-          <p-card header="Nedavne aktivnosti" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'admin.dashboard.recent_activities' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="activities-list">
               @for (activity of statistics.recentActivities; track activity.id) {
                 <div class="activity-item">
@@ -323,11 +326,11 @@ import { AdministrationService, DashboardStatistics, RecentActivity } from '../s
             </div>
           </p-card>
         } @else {
-          <p-card header="Nedavne aktivnosti">
+          <p-card [header]="'admin.dashboard.recent_activities' | translate">
             <div class="empty-state">
               <i class="pi pi-history empty-icon"></i>
-              <h3>Nema nedavnih aktivnosti</h3>
-              <p>Aktivnosti će se prikazati kada se dogode promjene u sustavu.</p>
+              <h3>{{ 'admin.dashboard.no_recent_activities' | translate }}</h3>
+              <p>{{ 'admin.dashboard.activities_will_appear' | translate }}</p>
             </div>
           </p-card>
         }
@@ -626,10 +629,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private administrationService: AdministrationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadDashboardData();
   }
 
@@ -653,8 +658,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           console.error('Error loading dashboard statistics:', error);
-          this.error = 'Greška pri dohvaćanju statistika. Molimo pokušajte ponovno.';
-          this.showError('Greška pri dohvaćanju podataka');
+          this.error = this.translationService.instant('admin.dashboard.statistics_error');
+          this.showError(this.translationService.instant('admin.dashboard.data_fetch_error'));
         }
       });
   }
@@ -675,11 +680,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   getActivityTypeText(type: string): string {
     switch (type.toLowerCase()) {
-      case 'user': return 'Korisnik';
-      case 'internship': return 'Praksa';
-      case 'provider': return 'Ponuditelj';
-      case 'report': return 'Izvještaj';
-      default: return 'Aktivnost';
+      case 'user': return this.translationService.instant('admin.dashboard.user_activity');
+      case 'internship': return this.translationService.instant('admin.dashboard.internship_activity');
+      case 'provider': return this.translationService.instant('admin.dashboard.provider_activity');
+      case 'report': return this.translationService.instant('admin.dashboard.report_activity');
+      default: return this.translationService.instant('admin.dashboard.activity_type');
     }
   }
 
@@ -699,17 +704,19 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
     if (diffInHours < 1) {
-      return 'Prije manje od sat vremena';
+      return this.translationService.instant('time.less_than_hour_ago');
     } else if (diffInHours < 24) {
-      return `Prije ${diffInHours} ${diffInHours === 1 ? 'sat' : diffInHours < 5 ? 'sata' : 'sati'}`;
+      return this.translationService.instant('time.hours_ago', { hours: diffInHours });
     } else {
       const diffInDays = Math.floor(diffInHours / 24);
       if (diffInDays === 1) {
-        return 'Jučer';
+        return this.translationService.instant('time.yesterday');
       } else if (diffInDays < 7) {
-        return `Prije ${diffInDays} ${diffInDays < 5 ? 'dana' : 'dana'}`;
+        return this.translationService.instant('time.days_ago', { days: diffInDays });
       } else {
-        return date.toLocaleDateString('hr-HR', {
+        const currentLang = this.translationService.getCurrentLanguage();
+        const locale = currentLang === 'hr' ? 'hr-HR' : 'en-US';
+        return date.toLocaleDateString(locale, {
           day: 'numeric',
           month: 'short',
           year: 'numeric'
@@ -721,7 +728,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message,
       life: 5000
     });

@@ -8,6 +8,8 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { DropdownModule } from 'primeng/dropdown';
+import { TooltipModule } from 'primeng/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { 
   MentorService, 
@@ -17,6 +19,7 @@ import {
   parseInternshipStatus,
   parseStudyLevel
 } from '../services/mentor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 interface StatusFilter {
   label: string;
@@ -34,26 +37,28 @@ interface StatusFilter {
     TagModule,
     ToastModule,
     CardModule,
-    DropdownModule
+    DropdownModule,
+    TooltipModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="card">
       <div class="card-header">
-        <h2>Moji studenti</h2>
-        <p class="text-600">Pregled studenata koji izvršavaju praksu pod vašim vodstvom</p>
+        <h2>{{ 'mentor.students.title' | translate }}</h2>
+        <p class="text-600">{{ 'mentor.students.subtitle' | translate }}</p>
       </div>
 
       <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3 mb-4">
         <div class="flex flex-column sm:flex-row sm:align-items-center gap-2 sm:gap-3">
-          <label for="statusFilter" class="font-medium text-900 white-space-nowrap">Filtriraj po statusu:</label>
+          <label for="statusFilter" class="font-medium text-900 white-space-nowrap">{{ 'mentor.students.filter_by_status' | translate }}</label>
           <p-dropdown 
             id="statusFilter"
             [options]="statusFilterOptions" 
             [(ngModel)]="selectedStatusFilter"
             optionLabel="label"
             optionValue="value"
-            placeholder="Svi statusi"
+            [placeholder]="'mentor.students.all_statuses' | translate"
             [showClear]="true"
             (onChange)="onStatusFilterChange()"
             class="w-full sm:w-12rem">
@@ -62,7 +67,7 @@ interface StatusFilter {
         
         <div class="flex align-items-center text-600 white-space-nowrap">
           <i class="pi pi-users mr-2"></i>
-          <span>{{ filteredInternships.length }} {{ filteredInternships.length === 1 ? 'student' : 'studenata' }}</span>
+          <span>{{ getStudentCountText() }}</span>
         </div>
       </div>
 
@@ -72,20 +77,20 @@ interface StatusFilter {
         [paginator]="true" 
         [rows]="10"
         [showCurrentPageReport]="true"
-        currentPageReportTemplate="Prikazuje {first} do {last} od {totalRecords} studenata"
+        [currentPageReportTemplate]="'mentor.students.showing_records' | translate"
         [rowsPerPageOptions]="[10, 25, 50]"
         responsiveLayout="scroll">
         
         <ng-template pTemplate="header">
           <tr>
-            <th>Student</th>
-            <th>Email</th>
-            <th>Razina studija</th>
-            <th>Datum početka</th>
-            <th>Datum završetka</th>
-            <th>Status</th>
-            <th>Datum prijave</th>
-            <th>Akcije</th>
+            <th>{{ 'mentor.students.student' | translate }}</th>
+            <th>{{ 'mentor.students.email' | translate }}</th>
+            <th>{{ 'mentor.students.study_level' | translate }}</th>
+            <th>{{ 'mentor.students.start_date' | translate }}</th>
+            <th>{{ 'mentor.students.end_date' | translate }}</th>
+            <th>{{ 'mentor.students.status' | translate }}</th>
+            <th>{{ 'mentor.students.application_date' | translate }}</th>
+            <th>{{ 'mentor.students.actions' | translate }}</th>
           </tr>
         </ng-template>
         
@@ -96,7 +101,7 @@ interface StatusFilter {
                  <i class="pi pi-user" [class]="internship.student ? 'text-primary' : 'text-400'"></i>
                  <div class="flex flex-column">
                    <span class="font-medium" [class]="internship.student ? 'text-900' : 'text-500'">
-                     {{ internship.student?.fullName || 'Student nije pronađen' }}
+                     {{ internship.student?.fullName || ('mentor.students.student_not_found' | translate) }}
                    </span>
                    <small class="text-500" *ngIf="!internship.student && internship.studentId">
                      ID: {{ internship.studentId }}
@@ -143,7 +148,7 @@ interface StatusFilter {
                   severity="info" 
                   size="small"
                   [text]="true"
-                  pTooltip="Prikaži detalje"
+                  [pTooltip]="'mentor.students.view_details_tooltip' | translate"
                   (onClick)="viewDetails(internship)">
                 </p-button>
                 <p-button 
@@ -151,7 +156,7 @@ interface StatusFilter {
                   severity="secondary" 
                   size="small"
                   [text]="true"
-                  pTooltip="Dnevnik prakse"
+                  [pTooltip]="'mentor.students.view_logs_tooltip' | translate"
                   (onClick)="viewLogs(internship)">
                 </p-button>
                 <p-button 
@@ -160,7 +165,7 @@ interface StatusFilter {
                   severity="warn" 
                   size="small"
                   [text]="true"
-                  pTooltip="Izvještaj o praksi"
+                  [pTooltip]="'mentor.students.view_report_tooltip' | translate"
                   (onClick)="viewReport(internship)">
                 </p-button>
               </div>
@@ -173,8 +178,8 @@ interface StatusFilter {
             <td colspan="8" class="text-center p-4">
               <div class="text-500">
                 <i class="pi pi-users text-4xl mb-3 block"></i>
-                <p class="text-lg">Nema dodijeljenih studenata</p>
-                <p class="text-600">Kada prihvatite zahtjeve za praksu, studenti će se prikazati ovdje.</p>
+                <p class="text-lg">{{ 'mentor.students.no_assigned_students' | translate }}</p>
+                <p class="text-600">{{ 'mentor.students.students_will_appear' | translate }}</p>
               </div>
             </td>
           </tr>
@@ -261,11 +266,29 @@ export class MentorStudentsComponent implements OnInit {
   constructor(
     private mentorService: MentorService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit() {
+    this.translationService.initializeLanguage();
+    this.initializeStatusFilterOptions();
     this.loadInternships();
+  }
+
+  getStudentCountText(): string {
+    const count = this.filteredInternships.length;
+    return `${count} ${count === 1 ? this.translationService.instant('mentor.students.student').toLowerCase() : this.translationService.instant('common.students').toLowerCase()}`;
+  }
+
+  initializeStatusFilterOptions() {
+    this.statusFilterOptions = [
+      { label: this.translationService.instant('mentor.students.all_statuses'), value: null },
+      { label: this.translationService.instant('common.statuses.pending'), value: InternshipStatus.Pending },
+      { label: this.translationService.instant('common.statuses.accepted'), value: InternshipStatus.Accepted },
+      { label: this.translationService.instant('common.statuses.rejected'), value: InternshipStatus.Rejected },
+      { label: this.translationService.instant('common.statuses.completed'), value: InternshipStatus.Completed }
+    ];
   }
 
   loadInternships() {
@@ -286,8 +309,8 @@ export class MentorStudentsComponent implements OnInit {
         console.error('Error loading internships:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: 'Greška pri dohvaćanju studenata'
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('mentor.students.loading_error')
         });
         this.loading = false;
       }
@@ -332,12 +355,12 @@ export class MentorStudentsComponent implements OnInit {
 
   getStatusLabel(status: InternshipStatus): string {
     const statusMap = {
-      [InternshipStatus.Pending]: 'Na čekanju',
-      [InternshipStatus.Accepted]: 'Prihvaćeno',
-      [InternshipStatus.Rejected]: 'Odbačeno',
-      [InternshipStatus.Completed]: 'Završeno'
+      [InternshipStatus.Pending]: this.translationService.instant('common.statuses.pending'),
+      [InternshipStatus.Accepted]: this.translationService.instant('common.statuses.accepted'),
+      [InternshipStatus.Rejected]: this.translationService.instant('common.statuses.rejected'),
+      [InternshipStatus.Completed]: this.translationService.instant('common.statuses.completed')
     };
-    return statusMap[status] || 'Nepoznato';
+    return statusMap[status] || this.translationService.instant('common.unknown');
   }
 
   getStatusSeverity(status: InternshipStatus): 'success' | 'info' | 'warn' | 'danger' {
@@ -352,10 +375,10 @@ export class MentorStudentsComponent implements OnInit {
 
   getStudyLevelLabel(studyLevel: StudyLevel): string {
     const studyLevelMap = {
-      [StudyLevel.Undergraduate]: 'Preddiplomski',
-      [StudyLevel.Graduate]: 'Diplomski'
+      [StudyLevel.Undergraduate]: this.translationService.instant('common.study_levels.undergraduate'),
+      [StudyLevel.Graduate]: this.translationService.instant('common.study_levels.graduate')
     };
-    return studyLevelMap[studyLevel] || 'Nepoznato';
+    return studyLevelMap[studyLevel] || this.translationService.instant('common.unknown');
   }
 
   getStudyLevelSeverity(studyLevel: StudyLevel): 'success' | 'info' | 'warn' | 'danger' {
@@ -368,13 +391,13 @@ export class MentorStudentsComponent implements OnInit {
 
   getFormattedDate(dateString: string): string {
     if (!dateString || dateString === '0001-01-01T00:00:00+00:00') {
-      return 'Nepoznato';
+      return this.translationService.instant('common.unknown');
     }
     
     try {
       const date = new Date(dateString);
       if (date.getFullYear() < 1900) {
-        return 'Nepoznato';
+        return this.translationService.instant('common.unknown');
       }
       return date.toLocaleDateString('hr-HR', {
         day: '2-digit',
@@ -384,7 +407,7 @@ export class MentorStudentsComponent implements OnInit {
         minute: '2-digit'
       });
     } catch {
-      return 'Nepoznato';
+      return this.translationService.instant('common.unknown');
     }
   }
 } 

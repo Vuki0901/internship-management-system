@@ -8,9 +8,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ChipModule } from 'primeng/chip';
 import { DividerModule } from 'primeng/divider';
 import { MessageService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
 import { InternshipReportService, InternshipReport } from '../services/internship-report.service';
 import { InternshipsService, InternshipInformation, InternshipStatus } from '../services/internships.service';
 import { PdfDownloadService } from '../../shared/services/pdf-download.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-student-report',
@@ -22,15 +24,16 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
     ToastModule,
     ProgressSpinnerModule,
     ChipModule,
-    DividerModule
+    DividerModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Izvještaj o praksi</h1>
+        <h1>{{ 'student.report.title' | translate }}</h1>
         <p-button 
-          label="Nazad na pregled praksi"
+          [label]="'student.report.back_to_internships' | translate"
           icon="pi pi-arrow-left"
           severity="secondary"
           [outlined]="true"
@@ -42,7 +45,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-container">
           <p-progressSpinner></p-progressSpinner>
-          <p>Učitavanje...</p>
+          <p>{{ 'student.report.loading' | translate }}</p>
         </div>
 
         <!-- No Report State -->
@@ -50,25 +53,25 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           <p-card>
             <div class="no-report-content">
               <i class="pi pi-file-export no-report-icon"></i>
-              <h2>Generiraj izvještaj o praksi</h2>
-              <p>Praksa je završena i možete generirati izvještaj. Izvještaj će automatski uključiti podatke iz vašeg dnevnika prakse.</p>
+              <h2>{{ 'student.report.generate_report_title' | translate }}</h2>
+              <p>{{ 'student.report.generate_report_description' | translate }}</p>
               
               <div class="internship-summary">
-                <h3>Pregled prakse:</h3>
+                <h3>{{ 'student.report.internship_overview' | translate }}</h3>
                 <div class="summary-item">
-                  <strong>Tvrtka:</strong> {{ internship.internshipProvider?.name }}
+                  <strong>{{ 'student.report.company' | translate }}:</strong> {{ internship.internshipProvider?.name }}
                 </div>
                 <div class="summary-item">
-                  <strong>Studij:</strong> {{ getStudyLevelText(internship.studyLevel) }}
+                  <strong>{{ 'student.report.study' | translate }}:</strong> {{ getStudyLevelText(internship.studyLevel) }}
                 </div>
                 <div class="summary-item">
-                  <strong>Status:</strong> 
+                  <strong>{{ 'student.report.status' | translate }}:</strong> 
                   <p-chip [label]="getStatusText(internship.status)" [style]="{'background-color': '#d4edda', 'color': '#155724'}"></p-chip>
                 </div>
               </div>
 
               <p-button 
-                label="Generiraj izvještaj"
+                [label]="'student.report.generate_report' | translate"
                 icon="pi pi-plus"
                 [loading]="generating"
                 (onClick)="generateReport()"
@@ -82,16 +85,16 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
         <div *ngIf="!loading && report" class="report-container">
           <p-card>
             <div class="report-header">
-              <h2>Izvještaj o praksi</h2>
+              <h2>{{ 'student.report.title' | translate }}</h2>
               <div class="report-meta">
-                <span class="creation-date">Kreiran: {{ formatDate(report.createdOn) }}</span>
+                <span class="creation-date">{{ 'student.report.creation_date' | translate }}: {{ formatDate(report.createdOn) }}</span>
                 <p-chip 
-                  [label]="report.isConfirmedByMentor ? 'Potvrđen od mentora' : 'Čeka potvrdu mentora'"
+                  [label]="report.isConfirmedByMentor ? ('student.report.confirmed_by_mentor' | translate) : ('student.report.awaiting_confirmation' | translate)"
                   [style]="getConfirmationChipStyle(report.isConfirmedByMentor)">
                 </p-chip>
                 <div *ngIf="report.isConfirmedByMentor" class="download-actions">
                   <p-button 
-                    label="Preuzmi PDF"
+                    [label]="'student.report.download_pdf' | translate"
                     icon="pi pi-download"
                     severity="success"
                     [outlined]="true"
@@ -107,19 +110,19 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
 
             <!-- Automatic Data Section -->
             <div class="report-section">
-              <h3>Automatski podaci iz dnevnika</h3>
+              <h3>{{ 'student.report.automatic_data' | translate }}</h3>
               <div class="stats-grid">
                 <div class="stat-card">
                   <div class="stat-value">{{ report.totalHoursWorked }}</div>
-                  <div class="stat-label">Ukupno radnih sati</div>
+                  <div class="stat-label">{{ 'student.report.total_hours' | translate }}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-value">{{ report.totalLogEntries }}</div>
-                  <div class="stat-label">Broj unosa u dnevnik</div>
+                  <div class="stat-label">{{ 'student.report.total_entries' | translate }}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-value">{{ getAverageHours() }}</div>
-                  <div class="stat-label">Prosjek sati po danu</div>
+                  <div class="stat-label">{{ 'student.report.average_hours' | translate }}</div>
                 </div>
               </div>
             </div>
@@ -128,29 +131,29 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
 
             <!-- Mentor Content Section -->
             <div class="report-section">
-              <h3>Ocjena mentora</h3>
+              <h3>{{ 'student.report.mentor_evaluation' | translate }}</h3>
               <div *ngIf="report.mentorContent && report.mentorContent.trim().length > 0" class="mentor-content">
-                <h4>Komentar mentora:</h4>
+                <h4>{{ 'student.report.mentor_comment' | translate }}</h4>
                 <div class="content-box">{{ report.mentorContent }}</div>
               </div>
               <div *ngIf="!report.mentorContent || report.mentorContent.trim().length === 0" class="no-content">
-                <p>Mentor još nije dodao komentar.</p>
+                <p>{{ 'student.report.mentor_no_comment' | translate }}</p>
               </div>
 
               <div class="grade-section">
-                <h4>Ocjena:</h4>
+                <h4>{{ 'student.report.grade' | translate }}</h4>
                 <div *ngIf="report.grade" class="grade-display">
                   <span class="grade-value">{{ report.grade }}</span>
                   <span class="grade-max">/5</span>
                   <span class="grade-text">({{ getGradeText(report.grade) }})</span>
                 </div>
                 <div *ngIf="!report.grade" class="no-grade">
-                  <p>Ocjena još nije dodijeljena.</p>
+                  <p>{{ 'student.report.grade_not_assigned' | translate }}</p>
                 </div>
               </div>
 
               <div *ngIf="report.isConfirmedByMentor && report.confirmedAt" class="confirmation-info">
-                <p><strong>Potvrđeno od mentora:</strong> {{ formatDate(report.confirmedAt) }}</p>
+                <p><strong>{{ 'student.report.confirmed_by_mentor_on' | translate }}</strong> {{ formatDate(report.confirmedAt) }}</p>
               </div>
             </div>
           </p-card>
@@ -161,10 +164,10 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           <p-card>
             <div class="error-content">
               <i class="pi pi-exclamation-triangle error-icon"></i>
-              <h2>Izvještaj nije dostupan</h2>
-              <p>Izvještaj možete generirati samo nakon završetka prakse.</p>
+              <h2>{{ 'student.report.report_not_available' | translate }}</h2>
+              <p>{{ 'student.report.report_not_available_description' | translate }}</p>
               <p-button 
-                label="Nazad na pregled praksi"
+                [label]="'student.report.back_to_internships' | translate"
                 icon="pi pi-arrow-left"
                 severity="secondary"
                 (onClick)="goBack()">
@@ -451,10 +454,12 @@ export class StudentReportComponent implements OnInit {
     private reportService: InternshipReportService,
     private internshipsService: InternshipsService,
     private messageService: MessageService,
-    private pdfDownloadService: PdfDownloadService
+    private pdfDownloadService: PdfDownloadService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.internshipId = this.route.snapshot.paramMap.get('id') || '';
     if (this.internshipId) {
       this.loadInternshipAndReport();
@@ -479,7 +484,7 @@ export class StudentReportComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.showError('Greška pri učitavanju podataka o praksi.');
+        this.showError(this.translationService.instant('student.report.load_error'));
       }
     });
   }
@@ -504,15 +509,15 @@ export class StudentReportComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Izvještaj je uspješno generiran.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('student.report.generate_success')
         });
         this.generating = false;
         this.loadReport(); // Reload to show the new report
       },
       error: () => {
         this.generating = false;
-        this.showError('Greška pri generiranju izvještaja.');
+        this.showError(this.translationService.instant('student.report.generate_error'));
       }
     });
   }
@@ -546,52 +551,52 @@ export class StudentReportComponent implements OnInit {
 
   getGradeText(grade: number): string {
     switch (grade) {
-      case 5: return 'Odličan';
-      case 4: return 'Vrlo dobar';
-      case 3: return 'Dobar';
-      case 2: return 'Dovoljan';
-      case 1: return 'Nedovoljan';
+      case 5: return this.translationService.instant('student.report.grade_excellent');
+      case 4: return this.translationService.instant('student.report.grade_very_good');
+      case 3: return this.translationService.instant('student.report.grade_good');
+      case 2: return this.translationService.instant('student.report.grade_satisfactory');
+      case 1: return this.translationService.instant('student.report.grade_insufficient');
       default: return '';
     }
   }
 
   getStudyLevelText(level: any): string {
-    if (!level) return 'Nepoznato';
+    if (!level) return this.translationService.instant('common.study_level.unknown');
     
     // Handle both string and numeric values
     const levelStr = String(level).toLowerCase();
     switch (levelStr) {
       case '1':
       case 'undergraduate':
-        return 'Preddiplomski';
+        return this.translationService.instant('common.study_level.undergraduate');
       case '2':
       case 'graduate':
-        return 'Diplomski';
+        return this.translationService.instant('common.study_level.graduate');
       default:
-        return 'Nepoznato';
+        return this.translationService.instant('common.study_level.unknown');
     }
   }
 
   getStatusText(status: any): string {
-    if (!status) return 'Nepoznato';
+    if (!status) return this.translationService.instant('common.status.unknown');
     
     // Handle both string and numeric values
     const statusStr = String(status).toLowerCase();
     switch (statusStr) {
       case '1':
       case 'pending':
-        return 'Na čekanju';
+        return this.translationService.instant('common.status.pending');
       case '2':
       case 'accepted':
-        return 'Prihvaćena';
+        return this.translationService.instant('common.status.accepted');
       case '3':
       case 'rejected':
-        return 'Odbijena';
+        return this.translationService.instant('common.status.rejected');
       case '4':
       case 'completed':
-        return 'Završena';
+        return this.translationService.instant('common.status.completed');
       default:
-        return 'Nepoznato';
+        return this.translationService.instant('common.status.unknown');
     }
   }
 
@@ -606,14 +611,14 @@ export class StudentReportComponent implements OnInit {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message
     });
   }
 
   downloadPdf(): void {
     if (!this.report?.isConfirmedByMentor) {
-      this.showError('PDF se može preuzeti samo za potvrđene izvještaje.');
+      this.showError(this.translationService.instant('student.report.download_error'));
       return;
     }
 
@@ -625,20 +630,20 @@ export class StudentReportComponent implements OnInit {
           this.pdfDownloadService.downloadPdf(pdfResponse);
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'PDF izvještaj je uspješno preuzet.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('student.report.download_success')
           });
         } catch (error) {
-          this.showError('Greška pri preuzimanju PDF-a.');
+          this.showError(this.translationService.instant('student.report.download_error'));
         }
         this.downloadingPdf = false;
       },
       error: (error) => {
         this.downloadingPdf = false;
         if (error.status === 403) {
-          this.showError('PDF se može preuzeti samo za potvrđene izvještaje.');
+          this.showError(this.translationService.instant('student.report.download_error'));
         } else {
-          this.showError('Greška pri preuzimanju PDF izvještaja.');
+          this.showError(this.translationService.instant('student.report.download_error'));
         }
       }
     });

@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { ToastModule } from 'primeng/toast';
+import { TranslateModule } from '@ngx-translate/core';
+import { TranslationService } from '../services/translation.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastModule],
+  imports: [CommonModule, FormsModule, ToastModule, TranslateModule],
   template: `
     <div class="login-main-container">
       <!-- Role switching navigation -->
@@ -17,25 +19,25 @@ import { ToastModule } from 'primeng/toast';
           [class]="'role-switch-btn ' + (role === 'Student' ? 'active' : '')"
           (click)="switchRole('Student')">
           <i class="fa-solid fa-user-graduate"></i>
-          Student
+          {{ 'roles.student' | translate }}
         </button>
         <button 
           [class]="'role-switch-btn ' + (role === 'Mentor' ? 'active' : '')"
           (click)="switchRole('Mentor')">
           <i class="fa-solid fa-user-tie"></i>
-          Mentor
+          {{ 'roles.mentor' | translate }}
         </button>
         <button 
           [class]="'role-switch-btn ' + (role === 'Supervisor' ? 'active' : '')"
           (click)="switchRole('Supervisor')">
           <i class="fa-solid fa-user-check"></i>
-          Supervisor
+          {{ 'roles.supervisor' | translate }}
         </button>
         <button 
           [class]="'role-switch-btn ' + (role === 'Admin' ? 'active' : '')"
           (click)="switchRole('Admin')">
           <i class="fa-solid fa-user-shield"></i>
-          Admin
+          {{ 'roles.admin' | translate }}
         </button>
       </div>
 
@@ -46,12 +48,11 @@ import { ToastModule } from 'primeng/toast';
               <img src="assets/images/aai-logo.png" alt="AAI@EduHr Logo" class="aai-logo">
             </div>
             <div class="subtitle">
-              <p>Autentikacijska i autorizacijska infrastruktura znanosti i</p>
-              <p>visokog obrazovanja u Republici Hrvatskoj</p>
+              <p>{{ 'auth.aai_subtitle' | translate }}</p>
             </div>
             <form (ngSubmit)="onSubmit()" class="student-login-form">
               <div class="input-section">
-                <h3>KORISNIČKA OZNAKA</h3>
+                <h3>{{ 'auth.login.email_label' | translate }}</h3>
                 <div class="input-with-icon">
                   <i class="fa-solid fa-user user-icon"></i>
                   <input 
@@ -65,23 +66,28 @@ import { ToastModule } from 'primeng/toast';
                 </div>
               </div>
               <div class="input-section">
-                <h3>ZAPORKA</h3>
+                <h3>{{ 'auth.login.password_label' | translate }}</h3>
                 <div class="input-with-icon">
                   <i class="fa-solid fa-lock lock-icon"></i>
                   <input 
-                    type="password" 
+                    [type]="showPassword ? 'text' : 'password'" 
                     id="password" 
                     [(ngModel)]="password" 
                     name="password" 
                     required 
                     class="student-input"
                   >
+                  <i 
+                    [class]="'fa-solid ' + (showPassword ? 'fa-eye-slash' : 'fa-eye') + ' password-toggle'"
+                    (click)="togglePasswordVisibility()"
+                    [title]="showPassword ? ('auth.register.hide_password' | translate) : ('auth.register.show_password' | translate)">
+                  </i>
                 </div>
               </div>
-              <button type="submit" class="student-login-button">Prijava</button>
+              <button type="submit" class="student-login-button">{{ 'auth.login.login_button' | translate }}</button>
             </form>
-            <div class="register-link">
-              <p>Nemate račun? <a (click)="goToRegister()" class="register-link-btn">Registrirajte se</a></p>
+            <div class="register-link" (click)="goToRegister()">
+              <p>{{ 'auth.login.register_link' | translate }}</p>
             </div>
           </div>
         </div>
@@ -92,8 +98,8 @@ import { ToastModule } from 'primeng/toast';
           </div>
           <div class="separator"></div>
           <div class="login-form-section">
-            <h2>Pozdrav!</h2>
-            <p>Dobro došli natrag</p>
+            <h2>{{ 'common.welcome' | translate }}</h2>
+            <p>{{ 'common.welcome_back' | translate }}</p>
             <form (ngSubmit)="onSubmit()" class="other-roles-login-form">
               <div class="form-group-icon">
                 <i class="fa-solid fa-envelope"></i> <!-- Mail icon -->
@@ -103,22 +109,26 @@ import { ToastModule } from 'primeng/toast';
                   [(ngModel)]="email" 
                   name="email" 
                   required 
-                  placeholder="pliva@pliva.hr"
+                  [placeholder]="'auth.login.email_placeholder' | translate"
                 >
               </div>
               <div class="form-group-icon">
                 <i class="fa-solid fa-lock"></i> <!-- Lock icon -->
                 <input 
-                  type="password" 
+                  [type]="showPassword ? 'text' : 'password'" 
                   id="password" 
                   [(ngModel)]="password" 
                   name="password" 
                   required 
-                  placeholder="Lozinka"
+                  [placeholder]="'auth.login.password_placeholder' | translate"
                 >
+                <i 
+                  [class]="'fa-solid ' + (showPassword ? 'fa-eye-slash' : 'fa-eye') + ' password-toggle'"
+                  (click)="togglePasswordVisibility()"
+                  [title]="showPassword ? ('auth.register.hide_password' | translate) : ('auth.register.show_password' | translate)">
+                </i>
               </div>
-              <button type="submit" class="other-roles-login-button">Prijava</button>
-              <a href="#" class="forgot-password-link">Zaboravili ste lozinku?</a>
+              <button type="submit" class="other-roles-login-button">{{ 'auth.login.login_button' | translate }}</button>
             </form>
           </div>
         </div>
@@ -140,6 +150,7 @@ import { ToastModule } from 'primeng/toast';
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
+      flex-wrap: wrap;
     }
 
     .role-switch-btn {
@@ -156,6 +167,7 @@ import { ToastModule } from 'primeng/toast';
       cursor: pointer;
       transition: all 0.2s ease;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .role-switch-btn:hover {
@@ -180,6 +192,8 @@ import { ToastModule } from 'primeng/toast';
       min-height: 100vh;
       background-color: #f5f5f5;
       width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     /* Styles for Student Login (AAI@EduHr design) */
@@ -244,17 +258,47 @@ import { ToastModule } from 'primeng/toast';
       align-items: center;
     }
 
+    .input-with-icon input {
+      pointer-events: auto;
+      z-index: 1;
+    }
+
     .user-icon, .lock-icon {
       position: absolute;
       left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
       color: #666;
       font-size: 1.1rem;
-      z-index: 1;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-size: 1.1rem;
+      cursor: pointer;
+      z-index: 2;
+      transition: color 0.2s ease;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-color);
     }
 
     .student-input {
       width: 100%;
-      padding: 1rem 1rem 1rem 45px;
+      padding: 1rem 45px 1rem 45px;
       border: 1px solid #ddd;
       border-radius: 6px;
       font-size: 1rem;
@@ -315,9 +359,9 @@ import { ToastModule } from 'primeng/toast';
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       overflow: hidden;
-      width: 90%;
+      width: 100%;
       max-width: 960px; /* Adjust based on Figma design for overall width */
-      height: 600px; /* Adjust based on Figma design for overall height */
+      min-height: 600px; /* Change to min-height for flexibility */
     }
 
     .logo-section {
@@ -327,6 +371,7 @@ import { ToastModule } from 'primeng/toast';
       align-items: center;
       padding: 2rem;
       background-color: #ffffff;
+      min-height: 200px; /* Ensure minimum height on mobile */
     }
 
     .full-logo {
@@ -348,6 +393,7 @@ import { ToastModule } from 'primeng/toast';
       padding: 3rem;
       background-color: #ffffff;
       font-family: 'Inter', sans-serif; /* Assuming Inter font from Figma */
+      min-height: 400px; /* Ensure minimum height */
     }
 
     .login-form-section h2 {
@@ -375,16 +421,47 @@ import { ToastModule } from 'primeng/toast';
       align-items: center;
     }
 
-    .form-group-icon i {
+    .form-group-icon input {
+      pointer-events: auto;
+      z-index: 1;
+    }
+
+    .form-group-icon i:not(.password-toggle) {
       position: absolute;
       left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
       color: #9e9e9e; /* Icon color from Figma */
       font-size: 1.2rem; /* Adjust icon size */
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .form-group-icon .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9e9e9e;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 2;
+      transition: color 0.2s ease;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+    }
+
+    .form-group-icon .password-toggle:hover {
+      color: var(--primary-color);
     }
 
     .form-group-icon input {
       width: 100%;
-      padding: 1rem 1rem 1rem 45px; /* Adjust padding for icon */
+      padding: 1rem 45px 1rem 45px; /* Adjust padding for both icons */
       border: 1px solid #e0e0e0;
       border-radius: 8px; /* Slightly more rounded corners */
       font-size: 1rem;
@@ -417,16 +494,206 @@ import { ToastModule } from 'primeng/toast';
       background-color: var(--primary-dark);
     }
 
-    .forgot-password-link {
-      text-align: center;
-      margin-top: 1.5rem;
-      color: #007bff; /* Link color */
-      text-decoration: none;
-      font-size: 0.9rem;
+
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .student-login-container {
+        margin-top: 60px;
+      }
+
+      .login-main-container {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 90px; /* Much more compact spacing */
+      }
+
+      /* Role switcher mobile adjustments */
+      .role-switcher {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+
+      .role-switch-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 12px 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        min-height: 50px;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      .role-switch-btn i {
+        font-size: 1.1rem;
+        margin-bottom: 1px;
+      }
+
+      .role-switch-btn:hover {
+        background: rgba(var(--primary-color-rgb), 0.1);
+        transform: translateY(-1px);
+      }
+
+      .role-switch-btn.active {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+      }
+
+      /* Student login mobile adjustments */
+      .student-login-card {
+        padding: 2rem 1.5rem;
+        margin: 0 10px;
+      }
+
+      .aai-logo {
+        max-width: 150px;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+        margin-bottom: 2rem;
+      }
+
+      .input-section h3 {
+        font-size: 0.8rem;
+      }
+
+      .student-input {
+        padding: 0.875rem 40px 0.875rem 40px;
+        font-size: 0.9rem;
+      }
+
+      .user-icon, .lock-icon {
+        left: 12px;
+        font-size: 1rem;
+      }
+
+      .password-toggle {
+        right: 12px;
+        font-size: 1rem;
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Other roles login mobile adjustments */
+      .other-roles-login-container {
+        flex-direction: column;
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+        margin: 0 10px;
+      }
+
+      .logo-section {
+        flex: none;
+        padding: 1.5rem 1rem;
+        min-height: 120px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .full-logo {
+        max-width: 180px;
+      }
+
+      .separator {
+        display: none; /* Hide separator on mobile */
+      }
+
+      .login-form-section {
+        flex: none;
+        padding: 2rem 1.5rem;
+        min-height: auto;
+      }
+
+      .login-form-section h2 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .login-form-section p {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group-icon input {
+        padding: 0.875rem 40px 0.875rem 40px;
+        font-size: 0.9rem;
+      }
+
+      .form-group-icon i:not(.password-toggle) {
+        left: 12px;
+        font-size: 1.1rem;
+      }
+
+      .form-group-icon .password-toggle {
+        right: 12px;
+        font-size: 1.1rem;
+        width: 18px;
+        height: 18px;
+      }
+
+      .other-roles-login-button {
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+      }
     }
 
-    .forgot-password-link:hover {
-      text-decoration: underline;
+    /* Small mobile screens */
+    @media (max-width: 480px) {
+      .login-main-container {
+        padding: 5px;
+        padding-top: 85px; /* More compact on small screens */
+      }
+
+      .role-switcher {
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        padding: 6px;
+        gap: 4px;
+      }
+
+      .role-switch-btn {
+        padding: 10px 6px;
+        font-size: 0.75rem;
+        min-height: 44px;
+      }
+
+      .role-switch-btn i {
+        font-size: 1rem;
+      }
+
+      .student-login-card {
+        padding: 1.5rem 1rem;
+        margin: 0;
+      }
+
+      .other-roles-login-container {
+        margin: 60px 0 0 0;
+      }
+
+      .login-form-section {
+        padding: 1.5rem 1rem;
+      }
+
+      .login-form-section h2 {
+        font-size: 1.75rem;
+      }
     }
   `]
 })
@@ -434,10 +701,19 @@ export class LoginComponent implements OnInit {
   @Input() role: string = '';
   email: string = '';
   password: string = '';
+  showPassword: boolean = false;
 
-  constructor(private router: Router, private authService: AuthService, private activatedRoute: ActivatedRoute) {}
+  constructor(
+    private router: Router, 
+    private authService: AuthService, 
+    private activatedRoute: ActivatedRoute,
+    private translationService: TranslationService
+  ) {}
 
   ngOnInit(): void {
+    // Initialize translations first
+    this.translationService.initializeLanguage();
+    
     this.activatedRoute.data.subscribe(data => {
       if (data['role']) {
         this.role = data['role'];
@@ -470,5 +746,9 @@ export class LoginComponent implements OnInit {
 
   goToRegister() {
     this.router.navigate(['/student/register']);
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 } 

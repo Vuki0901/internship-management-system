@@ -13,9 +13,11 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
 import { InternshipProvidersService, InternshipProvider } from '../services/internship-providers.service';
 import { InternshipsService, InternshipInformation, InternshipStatus, StudyLevel } from '../services/internships.service';
 import { ApplyInternshipDialogComponent } from '../components/apply-internship-dialog/apply-internship-dialog.component';
+import { TranslationService } from '../../shared/services/translation.service';
 
 interface ProviderDisplay extends InternshipProvider {
   // Using the actual data model from backend
@@ -44,22 +46,23 @@ interface InternshipDisplay extends InternshipInformation {
     ToastModule,
     TagModule,
     ConfirmDialogModule,
+    TranslateModule,
     ApplyInternshipDialogComponent
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Upravljanje praksama</h1>
-        <p>Pregled vaših prijava za praksu i mogućnost prijave kod novih pružatelja prakse</p>
+        <h1>{{ 'student.internships.title' | translate }}</h1>
+        <p>{{ 'student.internships.subtitle' | translate }}</p>
       </header>
 
       <!-- My Internship Applications Section -->
       <div class="content-card" style="margin-bottom: 2rem;">
         <div class="section-header">
-          <h2>Moje prijave za praksu</h2>
+          <h2>{{ 'student.internships.my_applications' | translate }}</h2>
           <p-button 
-            label="Osvježi" 
+            [label]="'student.internships.refresh' | translate" 
             icon="pi pi-refresh" 
             [text]="true"
             (onClick)="loadMyInternships()">
@@ -74,12 +77,12 @@ interface InternshipDisplay extends InternshipInformation {
 
           <ng-template pTemplate="header">
             <tr>
-              <th>Pružatelj prakse</th>
-              <th>Razina studija</th>
-              <th>Željeni početak</th>
-              <th>Status</th>
-              <th>Datum prijave</th>
-              <th>Akcije</th>
+              <th>{{ 'student.internships.provider' | translate }}</th>
+              <th>{{ 'student.internships.study_level' | translate }}</th>
+              <th>{{ 'student.internships.desired_start' | translate }}</th>
+              <th>{{ 'student.internships.status' | translate }}</th>
+              <th>{{ 'student.internships.application_date' | translate }}</th>
+              <th>{{ 'student.internships.actions' | translate }}</th>
             </tr>
           </ng-template>
 
@@ -100,7 +103,7 @@ interface InternshipDisplay extends InternshipInformation {
                   <!-- Complete Internship Button - for Accepted status -->
                   @if (isAcceptedStatus(internship.status)) {
                     <p-button 
-                      label="Završi praksu" 
+                      [label]="'student.internships.complete_internship' | translate" 
                       icon="pi pi-check-circle" 
                       size="small"
                       severity="success"
@@ -112,7 +115,7 @@ interface InternshipDisplay extends InternshipInformation {
                   <!-- Report Button - for Completed status -->
                   @if (isCompletedStatus(internship.status)) {
                     <p-button 
-                      label="Izvještaj" 
+                      [label]="'student.internships.report' | translate" 
                       icon="pi pi-file-export" 
                       size="small"
                       severity="info"
@@ -133,7 +136,7 @@ interface InternshipDisplay extends InternshipInformation {
           <ng-template pTemplate="emptymessage">
             <tr>
               <td colspan="6" class="text-center">
-                Još niste se prijavili za nijednu praksu.
+                {{ 'student.internships.no_applications' | translate }}
               </td>
             </tr>
           </ng-template>
@@ -143,8 +146,8 @@ interface InternshipDisplay extends InternshipInformation {
       <!-- Available Internship Providers Section -->
       <div class="content-card">
         <div class="section-header">
-          <h2>Dostupni pružatelji prakse</h2>
-          <p>Odaberite pružatelja prakse kod kojeg se želite prijaviti</p>
+          <h2>{{ 'student.internships.available_providers' | translate }}</h2>
+          <p>{{ 'student.internships.available_providers_subtitle' | translate }}</p>
         </div>
 
         <!-- Search Section -->
@@ -156,7 +159,7 @@ interface InternshipDisplay extends InternshipInformation {
             <input 
               type="text" 
               pInputText 
-              placeholder="Pretraži pružatelje prakse..."
+              [placeholder]="'student.internships.search_placeholder' | translate"
               [(ngModel)]="searchTerm"
               (input)="filterProviders()">
           </p-iconfield>
@@ -173,28 +176,28 @@ interface InternshipDisplay extends InternshipInformation {
           [sortMode]="'multiple'"
           [tableStyle]="{'min-width': '70rem'}"
           [showFirstLastIcon]="false"
-          currentPageReportTemplate="Prikazuje se {first} do {last} od {totalRecords} unosa"
+          [currentPageReportTemplate]="'student.internships.showing_records' | translate"
           [showCurrentPageReport]="true">
 
           <ng-template pTemplate="header">
             <tr>
               <th pSortableColumn="name" style="min-width: 15rem">
-                Naziv
+                {{ 'student.internships.name' | translate }}
                 <p-sortIcon field="name"></p-sortIcon>
               </th>
               <th pSortableColumn="address" style="min-width: 18rem">
-                Adresa
+                {{ 'student.internships.address' | translate }}
                 <p-sortIcon field="address"></p-sortIcon>
               </th>
               <th pSortableColumn="contactEmailAddress" style="min-width: 16rem">
-                Email
+                {{ 'student.internships.email' | translate }}
                 <p-sortIcon field="contactEmailAddress"></p-sortIcon>
               </th>
               <th pSortableColumn="contactPhoneNumber" style="min-width: 10rem">
-                Telefon
+                {{ 'student.internships.phone' | translate }}
                 <p-sortIcon field="contactPhoneNumber"></p-sortIcon>
               </th>
-              <th style="width: 10rem">Akcije</th>
+              <th style="width: 10rem">{{ 'student.internships.actions' | translate }}</th>
             </tr>
           </ng-template>
 
@@ -222,7 +225,7 @@ interface InternshipDisplay extends InternshipInformation {
               </td>
               <td>
                 <p-button 
-                  label="Prijavi se" 
+                  [label]="'student.internships.apply' | translate" 
                   icon="pi pi-user-plus" 
                   size="small"
                   (onClick)="applyForInternship(provider)"
@@ -235,7 +238,7 @@ interface InternshipDisplay extends InternshipInformation {
           <ng-template pTemplate="emptymessage">
             <tr>
               <td colspan="5" class="text-center">
-                Nema dostupnih pružatelja prakse.
+                {{ 'student.internships.no_providers' | translate }}
               </td>
             </tr>
           </ng-template>
@@ -470,10 +473,12 @@ export class StudentInternshipsComponent implements OnInit {
     private internshipsService: InternshipsService,
     private messageService: MessageService,
     private router: Router,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadInternshipProviders();
     this.loadMyInternships();
   }
@@ -490,8 +495,8 @@ export class StudentInternshipsComponent implements OnInit {
         console.error('Error loading internship providers:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: 'Nije moguće učitati pružatelje prakse.'
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('student.internships.loading_providers_error')
         });
         this.loading = false;
       }
@@ -514,8 +519,8 @@ export class StudentInternshipsComponent implements OnInit {
         console.error('Error loading my internships:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška', 
-          detail: 'Nije moguće učitati vaše prijave za praksu.'
+          summary: this.translationService.instant('common.error'), 
+          detail: this.translationService.instant('student.internships.loading_internships_error')
         });
         this.loadingInternships = false;
       }
@@ -551,8 +556,8 @@ export class StudentInternshipsComponent implements OnInit {
 
   completeInternship(internship: InternshipDisplay): void {
     this.confirmationService.confirm({
-      message: `Jeste li sigurni da želite označiti praksu kod "${internship.internshipProvider?.name}" kao završenu? Ova akcija se ne može poništiti.`,
-      header: 'Potvrda završetka prakse',
+      message: `${this.translationService.instant('student.internships.complete_confirm_message')}`,
+      header: this.translationService.instant('student.internships.complete_confirm_header'),
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.markInternshipAsCompleted(internship.id);
@@ -565,8 +570,8 @@ export class StudentInternshipsComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Praksa je uspješno označena kao završena. Sada možete generirati izvještaj.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('student.internships.complete_success')
         });
         this.loadMyInternships(); // Refresh the list
       },
@@ -574,8 +579,8 @@ export class StudentInternshipsComponent implements OnInit {
         console.error('Error completing internship:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: 'Dogodila se greška pri označavanju prakse kao završene. Molimo pokušajte ponovno.'
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('student.internships.complete_error')
         });
       }
     });
@@ -592,18 +597,18 @@ export class StudentInternshipsComponent implements OnInit {
     switch (statusStr) {
       case 'Pending':
       case '1':
-        return 'Na čekanju';
+        return this.translationService.instant('common.status.pending');
       case 'Accepted':
       case '2':
-        return 'Prihvaćeno';
+        return this.translationService.instant('common.status.accepted');
       case 'Rejected':
       case '3':
-        return 'Odbačeno';
+        return this.translationService.instant('common.status.rejected');
       case 'Completed':
       case '4':
-        return 'Završeno';
+        return this.translationService.instant('common.status.completed');
       default:
-        return 'Nepoznato';
+        return this.translationService.instant('common.status.unknown');
     }
   }
 
@@ -632,12 +637,12 @@ export class StudentInternshipsComponent implements OnInit {
     switch (studyLevelStr) {
       case 'Undergraduate':
       case '1':
-        return 'Preddiplomski';
+        return this.translationService.instant('common.study_level.undergraduate');
       case 'Graduate':
       case '2':
-        return 'Diplomski';
+        return this.translationService.instant('common.study_level.graduate');
       default:
-        return 'Nepoznato';
+        return this.translationService.instant('common.study_level.unknown');
     }
   }
 

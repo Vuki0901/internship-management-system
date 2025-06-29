@@ -11,9 +11,11 @@ import { DividerModule } from 'primeng/divider';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { MentorReportService, InternshipReport, UpdateInternshipReportRequest } from '../services/mentor-report.service';
 import { PdfDownloadService } from '../../shared/services/pdf-download.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-mentor-report',
@@ -29,16 +31,17 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
     DividerModule,
     InputTextarea,
     CheckboxModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TranslateModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Pregled izvještaja</h1>
+        <h1>{{ 'mentor.report.title' | translate }}</h1>
         <div class="header-actions">
           <p-button 
-            label="Nazad na pregled praksi"
+            [label]="'mentor.report.back_to_internships' | translate"
             icon="pi pi-arrow-left"
             severity="secondary"
             [outlined]="true"
@@ -46,7 +49,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           </p-button>
           <div *ngIf="report?.isConfirmedByMentor" class="download-actions">
             <p-button 
-              label="Preuzmi PDF"
+              [label]="'mentor.report.download_pdf' | translate"
               icon="pi pi-download"
               severity="success"
               [outlined]="true"
@@ -62,7 +65,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-container">
           <p-progressSpinner></p-progressSpinner>
-          <p>Učitavanje...</p>
+          <p>{{ 'mentor.report.loading' | translate }}</p>
         </div>
 
         <!-- No Report State -->
@@ -70,10 +73,10 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           <p-card>
             <div class="no-report-content">
               <i class="pi pi-exclamation-triangle no-report-icon"></i>
-              <h2>Izvještaj nije dostupan</h2>
-              <p>Student još nije generirao izvještaj za ovu praksu.</p>
+              <h2>{{ 'mentor.report.not_available' | translate }}</h2>
+              <p>{{ 'mentor.report.student_not_generated' | translate }}</p>
               <p-button 
-                label="Nazad na pregled praksi"
+                [label]="'mentor.report.back_to_internships' | translate"
                 icon="pi pi-arrow-left"
                 severity="secondary"
                 (onClick)="goBack()">
@@ -86,11 +89,11 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
         <div *ngIf="!loading && report" class="report-container">
           <p-card>
             <div class="report-header">
-              <h2>Izvještaj o praksi</h2>
+              <h2>{{ 'mentor.report.internship_report' | translate }}</h2>
               <div class="report-meta">
-                <span class="creation-date">Kreiran: {{ formatDate(report.createdOn) }}</span>
+                <span class="creation-date">{{ 'mentor.report.created' | translate }}: {{ formatDate(report.createdOn) }}</span>
                 <p-chip 
-                  [label]="report.isConfirmedByMentor ? 'Potvrđen' : 'Nepotvrđen'"
+                  [label]="report.isConfirmedByMentor ? ('mentor.report.confirmed' | translate) : ('mentor.report.unconfirmed' | translate)"
                   [style]="getConfirmationChipStyle(report.isConfirmedByMentor)">
                 </p-chip>
               </div>
@@ -100,19 +103,19 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
 
             <!-- Student Data Section -->
             <div class="report-section">
-              <h3>Podaci iz dnevnika studenta</h3>
+              <h3>{{ 'mentor.report.student_data' | translate }}</h3>
               <div class="stats-grid">
                 <div class="stat-card">
                   <div class="stat-value">{{ report.totalHoursWorked }}</div>
-                  <div class="stat-label">Ukupno radnih sati</div>
+                  <div class="stat-label">{{ 'mentor.report.total_hours' | translate }}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-value">{{ report.totalLogEntries }}</div>
-                  <div class="stat-label">Broj unosa u dnevnik</div>
+                  <div class="stat-label">{{ 'mentor.report.log_entries' | translate }}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-value">{{ getAverageHours() }}</div>
-                  <div class="stat-label">Prosjek sati po danu</div>
+                  <div class="stat-label">{{ 'mentor.report.average_hours' | translate }}</div>
                 </div>
               </div>
             </div>
@@ -121,20 +124,20 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
 
             <!-- Mentor Assessment Form -->
             <div class="report-section">
-              <h3>Pregled mentora</h3>
+              <h3>{{ 'mentor.report.mentor_review' | translate }}</h3>
               
               <div class="form-section">
-                <label for="mentorContent">Komentar o radu studenta:</label>
+                <label for="mentorContent">{{ 'mentor.report.comment_label' | translate }}</label>
                 <textarea 
                   id="mentorContent"
                   pInputTextarea 
                   [(ngModel)]="formData.mentorContent"
                   [rows]="6"
-                  placeholder="Unesite svoj komentar o radu studenta..."
+                  [placeholder]="'mentor.report.comment_placeholder' | translate"
                   [maxlength]="4000"
                   [disabled]="saving">
                 </textarea>
-                <small class="char-counter">{{ formData.mentorContent.length }}/4000 znakova</small>
+                <small class="char-counter">{{ formData.mentorContent.length }}/4000 {{ 'mentor.report.characters' | translate }}</small>
               </div>
 
               <div class="form-section checkbox-section">
@@ -145,20 +148,20 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
                     inputId="confirmed"
                     [disabled]="saving">
                   </p-checkbox>
-                  <label for="confirmed" class="checkbox-label">Potvrđujem da je izvještaj pregledan</label>
+                  <label for="confirmed" class="checkbox-label">{{ 'mentor.report.confirm_reviewed' | translate }}</label>
                 </div>
               </div>
 
               <div class="form-actions">
                 <p-button 
-                  label="Spremi"
+                  [label]="'mentor.report.save' | translate"
                   icon="pi pi-save"
                   [loading]="saving"
                   (onClick)="saveReport()"
                   [disabled]="!isFormValid()">
                 </p-button>
                 <p-button 
-                  label="Resetiraj"
+                  [label]="'mentor.report.reset' | translate"
                   icon="pi pi-refresh"
                   severity="secondary"
                   [outlined]="true"
@@ -168,7 +171,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
               </div>
 
               <div *ngIf="report.isConfirmedByMentor && report.confirmedAt" class="confirmation-info">
-                <p><strong>Potvrđeno:</strong> {{ formatDate(report.confirmedAt) }}</p>
+                <p><strong>{{ 'mentor.report.confirmed_on' | translate }}:</strong> {{ formatDate(report.confirmedAt) }}</p>
               </div>
             </div>
           </p-card>
@@ -461,10 +464,12 @@ export class MentorReportComponent implements OnInit {
     private reportService: MentorReportService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private pdfDownloadService: PdfDownloadService
+    private pdfDownloadService: PdfDownloadService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.internshipId = this.route.snapshot.paramMap.get('id') || '';
     if (this.internshipId) {
       this.loadReport();
@@ -501,7 +506,7 @@ export class MentorReportComponent implements OnInit {
 
   saveReport(): void {
     if (!this.isFormValid()) {
-      this.showError('Molimo unesite komentar.');
+      this.showError(this.translationService.instant('common.required_field'));
       return;
     }
 
@@ -518,25 +523,25 @@ export class MentorReportComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Izvještaj je uspješno ažuriran.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('mentor.report.save_success')
         });
         this.saving = false;
         this.loadReport(); // Reload to get updated data
       },
       error: () => {
         this.saving = false;
-        this.showError('Greška pri spremanju izvještaja.');
+        this.showError(this.translationService.instant('mentor.report.save_error'));
       }
     });
   }
 
   resetForm(): void {
     this.confirmationService.confirm({
-      message: 'Jeste li sigurni da želite resetirati formu? Sve nespremljene promjene će biti izgubljene.',
-      header: 'Potvrda',
-      acceptLabel: 'Resetiraj',
-      rejectLabel: 'Odustani',
+      message: this.translationService.instant('mentor.report.reset_confirm'),
+      header: this.translationService.instant('mentor.report.reset_confirm_header'),
+      acceptLabel: this.translationService.instant('mentor.report.reset'),
+      rejectLabel: this.translationService.instant('common.cancel'),
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.initializeForm();
@@ -574,7 +579,7 @@ export class MentorReportComponent implements OnInit {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message
     });
   }
@@ -583,8 +588,8 @@ export class MentorReportComponent implements OnInit {
     if (!this.report?.isConfirmedByMentor) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Upozorenje',
-        detail: 'PDF se može preuzeti samo za potvrđene izvještaje.'
+        summary: this.translationService.instant('common.warning'),
+        detail: this.translationService.instant('common.pdf_confirmed_only')
       });
       return;
     }
@@ -597,14 +602,14 @@ export class MentorReportComponent implements OnInit {
           this.pdfDownloadService.downloadPdf(pdfResponse);
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'PDF izvještaj je uspješno preuzet.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('common.pdf_downloaded')
           });
         } catch (error) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Greška',
-            detail: 'Greška pri preuzimanju PDF-a.'
+            summary: this.translationService.instant('common.error'),
+            detail: this.translationService.instant('common.pdf_download_error')
           });
         }
         this.downloadingPdf = false;
@@ -614,14 +619,14 @@ export class MentorReportComponent implements OnInit {
         if (error.status === 403) {
           this.messageService.add({
             severity: 'warn',
-            summary: 'Upozorenje',
-            detail: 'PDF se može preuzeti samo za potvrđene izvještaje.'
+            summary: this.translationService.instant('common.warning'),
+            detail: this.translationService.instant('common.pdf_confirmed_only')
           });
         } else {
           this.messageService.add({
             severity: 'error',
-            summary: 'Greška',
-            detail: 'Greška pri preuzimanju PDF izvještaja.'
+            summary: this.translationService.instant('common.error'),
+            detail: this.translationService.instant('common.pdf_download_error')
           });
         }
       }

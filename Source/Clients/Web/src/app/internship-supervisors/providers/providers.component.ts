@@ -6,11 +6,13 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { 
   InternshipSupervisorService, 
   InternshipProviderInfo
 } from '../services/internship-supervisor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-supervisor-providers',
@@ -22,25 +24,26 @@ import {
     TableModule,
     InputTextModule,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Ponuditelji prakse</h1>
-        <p>Pregled svih ponuditelja prakse u sustavu</p>
+        <h1>{{ 'supervisor.providers.title' | translate }}</h1>
+        <p>{{ 'supervisor.providers.subtitle' | translate }}</p>
       </header>
 
       <div class="content-wrapper">
         <p-card class="providers-card">
           <div class="providers-header">
-            <h3>Lista ponuditelja ({{ filteredProviders.length }})</h3>
+            <h3>{{ 'supervisor.providers.title' | translate }} ({{ filteredProviders.length }})</h3>
             <div class="search-section">
               <input 
                 pInputText 
                 [(ngModel)]="searchTerm" 
-                placeholder="Pretraži po nazivu, adresi ili kontaktu..."
+                [placeholder]="'supervisor.providers.search_placeholder' | translate"
                 (input)="filterProviders()"
                 class="search-input">
               <i class="fa-solid fa-search search-icon"></i>
@@ -50,28 +53,28 @@ import {
           @if (loading) {
             <div class="loading-container">
               <p-progressSpinner></p-progressSpinner>
-              <p>Učitavanje ponuditelja...</p>
+              <p>{{ 'supervisor.providers.loading' | translate }}</p>
             </div>
           } @else if (filteredProviders.length === 0 && searchTerm) {
             <div class="no-results">
               <i class="fa-solid fa-search"></i>
-              <h3>Nema rezultata</h3>
-              <p>Nema ponuditelja koji odgovaraju vašem pretraživanju.</p>
+              <h3>{{ 'supervisor.providers.no_providers' | translate }}</h3>
+              <p>{{ 'supervisor.providers.no_providers_message' | translate }}</p>
             </div>
           } @else if (providers.length === 0) {
             <div class="no-providers">
               <i class="fa-solid fa-building"></i>
-              <h3>Nema ponuditelja</h3>
-              <p>Trenutno nema registriranih ponuditelja prakse.</p>
+              <h3>{{ 'supervisor.providers.no_providers' | translate }}</h3>
+              <p>{{ 'supervisor.providers.no_providers_message' | translate }}</p>
             </div>
           } @else {
             <p-table [value]="filteredProviders" [responsive]="true" [paginator]="true" [rows]="10">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Naziv</th>
-                  <th>Adresa</th>
-                  <th>Email</th>
-                  <th>Telefon</th>
+                  <th>{{ 'supervisor.providers.provider_name' | translate }}</th>
+                  <th>{{ 'supervisor.providers.address' | translate }}</th>
+                  <th>{{ 'common.email' | translate }}</th>
+                  <th>{{ 'common.phone' | translate }}</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-provider>
@@ -111,7 +114,7 @@ import {
                   <td colspan="4" class="text-center">
                     <div class="empty-message">
                       <i class="fa-solid fa-search"></i>
-                      <p>Nema ponuditelja koji odgovaraju vašem pretraživanju.</p>
+                      <p>{{ 'supervisor.providers.no_providers_message' | translate }}</p>
                     </div>
                   </td>
                 </tr>
@@ -317,10 +320,14 @@ export class SupervisorProvidersComponent implements OnInit {
 
   constructor(
     private supervisorService: InternshipSupervisorService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    // Initialize translations
+    this.translationService.initializeLanguage();
+    
     this.loadProviders();
   }
 
@@ -336,7 +343,7 @@ export class SupervisorProvidersComponent implements OnInit {
       error: (error) => {
         console.error('Error loading providers:', error);
         this.loading = false;
-        this.showError('Greška pri učitavanju ponuditelja prakse.');
+        this.showError(this.translationService.instant('supervisor.providers.loading_error'));
       }
     });
   }
@@ -359,7 +366,7 @@ export class SupervisorProvidersComponent implements OnInit {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message,
       life: 5000
     });

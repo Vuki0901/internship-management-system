@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,13 @@ builder.Services.AddAuthenticationJwtBearer(s => s.SigningKey = jwtConfiguration
 
 builder.Services.AddHttpContextAccessor();
 
+// Configure HTTPS
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+    options.HttpsPort = 5001;
+});
+
 builder.Services.AddOptions<JwtConfiguration>().Bind(jwtConfigurationSection).ValidateDataAnnotations().ValidateOnStart();
 
 builder.Services.AddCors(
@@ -63,7 +71,38 @@ builder.Services.AddCors(
 );
 
 var app = builder.Build();
-app.UseHttpsRedirection();
+
+// Add exception handling
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+}
+
+// Configure static files for Angular app
+app.UseDefaultFiles();
+// Configure file extension content type provider
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".js"] = "application/javascript";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider,
+    OnPrepareResponse = ctx =>
+    {
+        // Add cache headers for static files
+        if (ctx.File.Name.EndsWith(".js") || ctx.File.Name.EndsWith(".css"))
+        {
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+        }
+    }
+});
+
+// Configure HTTPS redirection (only in production or when explicitly enabled)
+if (!app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("EnableHttpsRedirection", false))
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseFastEndpoints(
@@ -79,5 +118,15 @@ app.UseFastEndpoints(
 app.UseSwaggerGen();
 app.UseCors();
 app.UseAuthenticatedUserSetter();
+
+// Handle development-specific requests that don't exist in production
+app.Map("/_framework/{**path}", context =>
+{
+    context.Response.StatusCode = 404;
+    return Task.CompletedTask;
+});
+
+// SPA fallback routing - serve index.html for any non-API routes
+app.MapFallbackToFile("index.html");
 
 app.Run();

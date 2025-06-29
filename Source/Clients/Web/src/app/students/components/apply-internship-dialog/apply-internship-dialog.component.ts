@@ -8,7 +8,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
 import { InternshipProvider, InternshipProvidersService, ApplyForInternshipRequest, StudyLevel } from '../../services/internship-providers.service';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-apply-internship-dialog',
@@ -21,7 +23,8 @@ import { InternshipProvider, InternshipProvidersService, ApplyForInternshipReque
     InputTextModule,
     DatePickerModule,
     SelectModule,
-    ToastModule
+    ToastModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
@@ -31,11 +34,11 @@ import { InternshipProvider, InternshipProvidersService, ApplyForInternshipReque
       [style]="{width: '500px'}"
       [closable]="true"
       (onHide)="onCancel()"
-      header="Prijava za praksu">
+      [header]="'student.apply_dialog.title' | translate">
       
       <div class="dialog-content">
         <div class="field">
-          <label for="provider">Odabrani pružatelj prakse:</label>
+          <label for="provider">{{ 'student.apply_dialog.selected_provider' | translate }}</label>
           <div class="provider-info">
             <strong>{{ selectedProvider?.name }}</strong>
             <div class="provider-details">
@@ -46,21 +49,21 @@ import { InternshipProvider, InternshipProvidersService, ApplyForInternshipReque
         </div>
 
         <div class="field">
-          <label for="studyLevel">Razina studija *</label>
+          <label for="studyLevel">{{ 'student.apply_dialog.study_level_required' | translate }}</label>
           <p-select 
             id="studyLevel"
             [(ngModel)]="formData.studyLevel" 
             [options]="studyLevelOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Odaberite razinu studija"
+            [placeholder]="'student.apply_dialog.study_level_placeholder' | translate"
             [style]="{'width': '100%'}"
             [required]="true">
           </p-select>
         </div>
 
         <div class="field">
-          <label for="startDate">Željeni datum početka *</label>
+          <label for="startDate">{{ 'student.apply_dialog.start_date_required' | translate }}</label>
           <p-datepicker 
             appendTo="body"
             id="startDate"
@@ -69,7 +72,7 @@ import { InternshipProvider, InternshipProvidersService, ApplyForInternshipReque
             [dateFormat]="'dd.mm.yy'"
             [minDate]="minDate"
             [style]="{'width': '100%'}"
-            placeholder="Odaberite datum"
+            [placeholder]="'student.apply_dialog.start_date_placeholder' | translate"
             [required]="true">
           </p-datepicker>
         </div>
@@ -78,12 +81,12 @@ import { InternshipProvider, InternshipProvidersService, ApplyForInternshipReque
       <ng-template pTemplate="footer">
         <div class="dialog-footer">
           <p-button 
-            label="Odustani" 
+            [label]="'student.apply_dialog.cancel' | translate" 
             [text]="true" 
             (onClick)="onCancel()">
           </p-button>
           <p-button 
-            label="Prijavi se" 
+            [label]="'student.apply_dialog.apply' | translate" 
             [loading]="submitting"
             [disabled]="!isFormValid()"
             (onClick)="onSubmit()">
@@ -158,8 +161,19 @@ export class ApplyInternshipDialogComponent {
 
   constructor(
     private internshipProvidersService: InternshipProvidersService,
-    private messageService: MessageService
-  ) {}
+    private messageService: MessageService,
+    private translationService: TranslationService
+  ) {
+    this.translationService.initializeLanguage();
+    this.initializeOptions();
+  }
+
+  private initializeOptions(): void {
+    this.studyLevelOptions = [
+      { label: this.translationService.instant('common.study_level.undergraduate'), value: StudyLevel.Undergraduate },
+      { label: this.translationService.instant('common.study_level.graduate'), value: StudyLevel.Graduate }
+    ];
+  }
 
   onCancel(): void {
     this.visible = false;
@@ -190,8 +204,8 @@ export class ApplyInternshipDialogComponent {
       next: (result) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Prijava za praksu je uspješno poslana!'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('student.apply_dialog.success')
         });
         this.onCancel();
         this.applicationSubmitted.emit();
@@ -200,8 +214,8 @@ export class ApplyInternshipDialogComponent {
         console.error('Error applying for internship:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: error.error?.errors?.[0]?.message || 'Došlo je do greške prilikom prijave za praksu.'
+          summary: this.translationService.instant('common.error'),
+          detail: error.error?.errors?.[0]?.message || this.translationService.instant('student.apply_dialog.error')
         });
       },
       complete: () => {

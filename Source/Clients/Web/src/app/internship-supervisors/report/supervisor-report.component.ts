@@ -9,9 +9,11 @@ import { ChipModule } from 'primeng/chip';
 import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { InternshipSupervisorService, InternshipReport, InternshipStatus, StudyLevel } from '../services/internship-supervisor.service';
 import { PdfDownloadService } from '../../shared/services/pdf-download.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-supervisor-report',
@@ -25,7 +27,8 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
     ChipModule,
     DividerModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TranslateModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -33,7 +36,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
       <div class="page-header">
         <div class="header-actions">
           <p-button 
-            label="Nazad na pregled praksi" 
+            [label]="'supervisor.report.back_to_internships' | translate" 
             icon="pi pi-arrow-left" 
             severity="secondary"
             [outlined]="true"
@@ -42,7 +45,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           </p-button>
           <div *ngIf="report?.isConfirmedByMentor" class="download-actions">
             <p-button 
-              label="Preuzmi PDF"
+              [label]="'supervisor.report.download_pdf' | translate"
               icon="pi pi-download"
               severity="success"
               [outlined]="true"
@@ -52,58 +55,58 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
             </p-button>
           </div>
         </div>
-        <h1>Izvještaj o praksi</h1>
-        <p>Pregled i ocjenjivanje izvještaja o praksi</p>
+        <h1>{{ 'supervisor.report.title' | translate }}</h1>
+        <p>{{ 'supervisor.report.subtitle' | translate }}</p>
       </div>
 
       @if (loading) {
         <div class="loading-container">
           <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--primary-color);"></i>
-          <p>Učitavanje izvještaja...</p>
+          <p>{{ 'supervisor.report.loading_report' | translate }}</p>
         </div>
       } @else if (report) {
         <div class="content-wrapper">
           <!-- Internship Information -->
-          <p-card header="Informacije o praksi" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'supervisor.report.internship_information' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="info-grid">
               <div class="info-section">
-                <h4>Student</h4>
+                <h4>{{ 'common.student' | translate }}</h4>
                 @if (report.internship.student) {
                   <div class="student-info">
                     <strong>{{ getStudentName(report.internship) }}</strong>
                     <small>{{ report.internship.student.emailAddress }}</small>
                   </div>
                 } @else {
-                  <span class="text-muted">Nepoznat student</span>
+                  <span class="text-muted">{{ 'supervisor.report.unknown_student' | translate }}</span>
                 }
               </div>
 
               <div class="info-section">
-                <h4>Mentor</h4>
+                <h4>{{ 'common.mentor' | translate }}</h4>
                 @if (report.internship.mentor) {
                   <div class="mentor-info">
                     <strong>{{ getMentorName(report.internship) }}</strong>
                     <small>{{ report.internship.mentor.emailAddress }}</small>
                   </div>
                 } @else {
-                  <span class="text-muted">Nepoznat mentor</span>
+                  <span class="text-muted">{{ 'supervisor.report.unknown_mentor' | translate }}</span>
                 }
               </div>
 
               <div class="info-section">
-                <h4>Ponuditelj prakse</h4>
+                <h4>{{ 'navigation.providers' | translate }}</h4>
                 @if (report.internship.internshipProvider) {
                   <div class="provider-info">
                     <strong>{{ report.internship.internshipProvider.name }}</strong>
                     <small>{{ report.internship.internshipProvider.address }}</small>
                   </div>
                 } @else {
-                  <span class="text-muted">Nepoznat ponuditelj</span>
+                  <span class="text-muted">{{ 'supervisor.report.unknown_provider' | translate }}</span>
                 }
               </div>
 
               <div class="info-section">
-                <h4>Razina studija</h4>
+                <h4>{{ 'dashboard.level' | translate }}</h4>
                 <p-chip 
                   [label]="getStudyLevelText(report.internship.studyLevel)"
                   [style]="getStudyLevelStyle(report.internship.studyLevel)">
@@ -111,7 +114,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
               </div>
 
               <div class="info-section">
-                <h4>Status prakse</h4>
+                <h4>{{ 'supervisor.report.internship_status' | translate }}</h4>
                 <p-chip 
                   [label]="getStatusText(report.internship.status)"
                   [style]="getStatusStyle(report.internship.status)">
@@ -119,7 +122,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
               </div>
 
               <div class="info-section">
-                <h4>Trajanje prakse</h4>
+                <h4>{{ 'supervisor.report.internship_duration' | translate }}</h4>
                 <div class="date-range">
                   <span>{{ formatDate(report.internship.startDate) }}</span>
                   <i class="pi pi-arrow-right" style="margin: 0 0.5rem; color: #666;"></i>
@@ -130,38 +133,38 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           </p-card>
 
           <!-- Report Statistics -->
-          <p-card header="Statistike izvještaja" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'supervisor.report.report_statistics' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="stats-grid">
               <div class="stat-item">
                 <div class="stat-value">{{ report.totalHoursWorked }}h</div>
-                <div class="stat-label">Ukupno sati rada</div>
+                <div class="stat-label">{{ 'supervisor.report.total_work_hours' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value">{{ report.totalLogEntries }}</div>
-                <div class="stat-label">Broj unosa</div>
+                <div class="stat-label">{{ 'supervisor.report.log_entries_count' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value">
                   @if (report.isConfirmedByMentor) {
                     <i class="pi pi-check-circle" style="color: #28a745;"></i>
-                    Potvrđen
+                    {{ 'supervisor.report.confirmed' | translate }}
                   } @else {
                     <i class="pi pi-times-circle" style="color: #dc3545;"></i>
-                    Nepotvrđen
+                    {{ 'supervisor.report.unconfirmed' | translate }}
                   }
                 </div>
-                <div class="stat-label">Status mentora</div>
+                <div class="stat-label">{{ 'supervisor.report.mentor_status' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value">{{ formatDate(report.confirmedAt) }}</div>
-                <div class="stat-label">Datum potvrde</div>
+                <div class="stat-label">{{ 'supervisor.report.confirmation_date' | translate }}</div>
               </div>
             </div>
           </p-card>
 
           <!-- Mentor Content -->
           @if (report.mentorContent) {
-            <p-card header="Komentar mentora" [style]="{'margin-bottom': '1.5rem'}">
+            <p-card [header]="'supervisor.report.mentor_comment' | translate" [style]="{'margin-bottom': '1.5rem'}">
               <div class="mentor-content">
                 <p>{{ report.mentorContent }}</p>
               </div>
@@ -169,16 +172,16 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
           }
 
           <!-- Grading Section -->
-          <p-card header="Ocjenjivanje" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'supervisor.report.grading_section' | translate" [style]="{'margin-bottom': '1.5rem'}">
             @if (report.grade) {
               <div class="existing-grade">
                 <div class="grade-display">
                   <span class="grade-value">{{ report.grade }}</span>
                   <span class="grade-label">/ 5</span>
                 </div>
-                <p class="grade-info">Izvještaj je već ocijenjen.</p>
+                <p class="grade-info">{{ 'supervisor.report.already_graded' | translate }}</p>
                 <p-button 
-                  label="Promijeni ocjenu" 
+                  [label]="'supervisor.report.change_grade' | translate" 
                   icon="pi pi-pencil" 
                   severity="warn"
                   [outlined]="true"
@@ -191,11 +194,11 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
                 @if (!report.isConfirmedByMentor) {
                   <div class="warning-message">
                     <i class="pi pi-exclamation-triangle"></i>
-                    <span>Izvještaj još nije potvrđen od strane mentora. Možete ga ocijeniti tek nakon potvrde.</span>
+                    <span>{{ 'supervisor.report.not_confirmed_warning' | translate }}</span>
                   </div>
                 } @else {
                   <div class="grade-input-section">
-                    <label>Odaberite ocjenu:</label>
+                    <label>{{ 'supervisor.report.select_grade' | translate }}</label>
                     <div class="grade-buttons">
                       @for (grade of [1, 2, 3, 4, 5]; track grade) {
                         <button 
@@ -217,7 +220,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
                     
                     <div class="grade-actions">
                       <p-button 
-                        label="Ocijeni izvještaj" 
+                        [label]="'supervisor.report.submit_grade' | translate" 
                         icon="pi pi-star" 
                         severity="success"
                         (onClick)="confirmGrading()"
@@ -233,7 +236,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
             @if (showGradingForm && report.grade) {
               <p-divider></p-divider>
               <div class="grade-input-section">
-                <label>Odaberite novu ocjenu:</label>
+                <label>{{ 'supervisor.report.select_grade' | translate }}</label>
                 <div class="grade-buttons">
                   @for (grade of [1, 2, 3, 4, 5]; track grade) {
                     <button 
@@ -255,7 +258,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
                 
                 <div class="grade-actions">
                   <p-button 
-                    label="Spremi novu ocjenu" 
+                    [label]="'common.save' | translate" 
                     icon="pi pi-save" 
                     severity="success"
                     (onClick)="confirmGrading()"
@@ -264,7 +267,7 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
                     [style]="{'margin-right': '0.5rem'}">
                   </p-button>
                   <p-button 
-                    label="Odustani" 
+                    [label]="'supervisor.report.cancel' | translate" 
                     icon="pi pi-times" 
                     severity="secondary"
                     [outlined]="true"
@@ -278,10 +281,10 @@ import { PdfDownloadService } from '../../shared/services/pdf-download.service';
       } @else {
         <div class="no-report">
           <i class="pi pi-file-excel" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i>
-          <h3>Izvještaj nije dostupan</h3>
-          <p>Izvještaj za ovu praksu nije pronađen ili nije dostupan za pregled.</p>
+          <h3>{{ 'common.not_available' | translate }}</h3>
+          <p>{{ 'supervisor.report.report_not_found' | translate }}</p>
           <p-button 
-            label="Nazad na pregled praksi" 
+            [label]="'supervisor.report.back_to_internships' | translate" 
             icon="pi pi-arrow-left" 
             severity="secondary"
             (onClick)="goBack()">
@@ -674,10 +677,12 @@ export class SupervisorReportComponent implements OnInit {
     private supervisorService: InternshipSupervisorService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private pdfDownloadService: PdfDownloadService
+    private pdfDownloadService: PdfDownloadService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.route.params.subscribe(params => {
       this.internshipId = params['id'];
       if (this.internshipId) {
@@ -698,7 +703,7 @@ export class SupervisorReportComponent implements OnInit {
       error: (error) => {
         console.error('Error loading report:', error);
         this.loading = false;
-        this.showError('Greška pri učitavanju izvještaja.');
+        this.showError(this.translationService.instant('supervisor.report.grade_error'));
       }
     });
   }
@@ -715,19 +720,24 @@ export class SupervisorReportComponent implements OnInit {
 
   confirmGrading(): void {
     if (!this.selectedGrade || this.selectedGrade < 1 || this.selectedGrade > 5) {
-      this.showError('Molimo unesite valjanu ocjenu između 1 i 5.');
+      this.showError(this.translationService.instant('error.invalid_grade'));
       return;
     }
 
-    const action = this.report?.grade ? 'promijeniti' : 'dodijeliti';
-    const message = `Jeste li sigurni da želite ${action} ocjenu ${this.selectedGrade} za ovaj izvještaj?`;
+    const action = this.report?.grade ? 
+      this.translationService.instant('common.change') : 
+      this.translationService.instant('common.assign');
+    const message = this.translationService.instant('common.confirm_grade_action', {
+      action: action,
+      grade: this.selectedGrade
+    });
 
     this.confirmationService.confirm({
       message: message,
-      header: 'Potvrda ocjenjivanja',
+      header: this.translationService.instant('common.confirm_grading'),
       icon: 'pi pi-star',
-      acceptLabel: 'Da',
-      rejectLabel: 'Ne',
+      acceptLabel: this.translationService.instant('common.yes'),
+      rejectLabel: this.translationService.instant('common.no'),
       accept: () => {
         this.gradeReport();
       }
@@ -743,13 +753,13 @@ export class SupervisorReportComponent implements OnInit {
       next: (response) => {
         this.grading = false;
         this.showGradingForm = false;
-        this.showSuccess('Izvještaj je uspješno ocijenjen.');
+        this.showSuccess(this.translationService.instant('supervisor.report.report_graded'));
         this.loadReport(); // Reload to get updated data
       },
       error: (error) => {
         console.error('Error grading report:', error);
         this.grading = false;
-        this.showError('Greška pri ocjenjivanju izvještaja.');
+        this.showError(this.translationService.instant('supervisor.report.grade_error'));
       }
     });
   }
@@ -766,14 +776,14 @@ export class SupervisorReportComponent implements OnInit {
 
   // Helper methods
   getStudentName(internship: any): string {
-    if (!internship.student) return 'Nepoznat student';
+    if (!internship.student) return this.translationService.instant('supervisor.report.unknown_student');
     
     const student = internship.student;
     return student.fullName || `${student.firstName || ''} ${student.lastName || ''}`.trim() || student.emailAddress;
   }
 
   getMentorName(internship: any): string {
-    if (!internship.mentor) return 'Nepoznat mentor';
+    if (!internship.mentor) return this.translationService.instant('supervisor.report.unknown_mentor');
     
     const mentor = internship.mentor;
     return mentor.fullName || `${mentor.firstName || ''} ${mentor.lastName || ''}`.trim() || mentor.emailAddress;
@@ -782,21 +792,21 @@ export class SupervisorReportComponent implements OnInit {
   getStatusText(status: InternshipStatus | string | number): string {
     if (typeof status === 'string') {
       switch (status) {
-        case 'Pending': return 'Na čekanju';
-        case 'Accepted': return 'Prihvaćeno';
-        case 'Rejected': return 'Odbačeno';
-        case 'Completed': return 'Završeno';
-        default: return 'Nepoznato';
+        case 'Pending': return this.translationService.instant('common.status.pending');
+        case 'Accepted': return this.translationService.instant('common.status.accepted');
+        case 'Rejected': return this.translationService.instant('common.status.rejected');
+        case 'Completed': return this.translationService.instant('common.status.completed');
+        default: return this.translationService.instant('common.unknown');
       }
     }
     
     const numericStatus = Number(status);
     switch (numericStatus) {
-      case InternshipStatus.Pending: return 'Na čekanju';
-      case InternshipStatus.Accepted: return 'Prihvaćeno';
-      case InternshipStatus.Rejected: return 'Odbačeno';
-      case InternshipStatus.Completed: return 'Završeno';
-      default: return 'Nepoznato';
+      case InternshipStatus.Pending: return this.translationService.instant('common.status.pending');
+      case InternshipStatus.Accepted: return this.translationService.instant('common.status.accepted');
+      case InternshipStatus.Rejected: return this.translationService.instant('common.status.rejected');
+      case InternshipStatus.Completed: return this.translationService.instant('common.status.completed');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -824,17 +834,17 @@ export class SupervisorReportComponent implements OnInit {
   getStudyLevelText(level: StudyLevel | string | number): string {
     if (typeof level === 'string') {
       switch (level) {
-        case 'Undergraduate': return 'Preddiplomski';
-        case 'Graduate': return 'Diplomski';
-        default: return 'Nepoznato';
+        case 'Undergraduate': return this.translationService.instant('common.study_level.undergraduate');
+        case 'Graduate': return this.translationService.instant('common.study_level.graduate');
+        default: return this.translationService.instant('common.unknown');
       }
     }
     
     const numericLevel = Number(level);
     switch (numericLevel) {
-      case StudyLevel.Undergraduate: return 'Preddiplomski';
-      case StudyLevel.Graduate: return 'Diplomski';
-      default: return 'Nepoznato';
+      case StudyLevel.Undergraduate: return this.translationService.instant('common.study_level.undergraduate');
+      case StudyLevel.Graduate: return this.translationService.instant('common.study_level.graduate');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -890,12 +900,12 @@ export class SupervisorReportComponent implements OnInit {
 
   getGradeText(grade: number): string {
     switch (grade) {
-      case 1: return 'Nedovoljan';
-      case 2: return 'Dovoljan';
-      case 3: return 'Dobar';
-      case 4: return 'Vrlo dobar';
-      case 5: return 'Odličan';
-      default: return 'Nepoznato';
+      case 1: return this.translationService.instant('supervisor.report.insufficient');
+      case 2: return this.translationService.instant('supervisor.report.satisfactory');
+      case 3: return this.translationService.instant('supervisor.report.good');
+      case 4: return this.translationService.instant('supervisor.report.very_good');
+      case 5: return this.translationService.instant('supervisor.report.excellent');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 

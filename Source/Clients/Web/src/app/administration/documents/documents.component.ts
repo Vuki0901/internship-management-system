@@ -12,10 +12,12 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DocumentService, DocumentDto, CreateDocumentRequest } from '../../shared/services/document.service';
 import { AuthService } from '../../shared/auth/auth.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-admin-documents',
@@ -31,19 +33,20 @@ import { AuthService } from '../../shared/auth/auth.service';
     ToastModule,
     ProgressBarModule,
     TagModule,
-    TooltipModule
+    TooltipModule,
+    TranslateModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="documents-container">
       <div class="documents-header">
-        <h1>Upravljanje dokumentima</h1>
-        <p>Ovdje možete uploadovati i upravljati dokumentima koji će biti dostupni svim korisnicima sustava.</p>
+        <h1>{{ 'admin.documents.title' | translate }}</h1>
+        <p>{{ 'admin.documents.subtitle' | translate }}</p>
       </div>
 
       <div class="documents-actions" *ngIf="canManageDocuments">
         <p-button 
-          label="Učitaj novi dokument"
+          [label]="'admin.documents.upload_new_document' | translate"
           icon="pi pi-upload"
           (onClick)="showUploadDialog = true">
         </p-button>
@@ -59,12 +62,12 @@ import { AuthService } from '../../shared/auth/auth.service';
           
           <ng-template pTemplate="header">
             <tr>
-              <th>Naziv datoteke</th>
-              <th>Veličina</th>
-              <th>Tip datoteke</th>
-              <th>Učitao</th>
-              <th>Datum učitavanja</th>
-              <th style="width: 12rem">Akcije</th>
+              <th>{{ 'admin.documents.file_name' | translate }}</th>
+              <th>{{ 'admin.documents.file_size' | translate }}</th>
+              <th>{{ 'admin.documents.file_type' | translate }}</th>
+              <th>{{ 'admin.documents.uploaded_by' | translate }}</th>
+              <th>{{ 'admin.documents.upload_date' | translate }}</th>
+              <th style="width: 12rem">{{ 'admin.documents.actions' | translate }}</th>
             </tr>
           </ng-template>
 
@@ -93,7 +96,7 @@ import { AuthService } from '../../shared/auth/auth.service';
                     severity="secondary"
                     size="small"
                     (onClick)="downloadDocument(document)"
-                    pTooltip="Preuzmi">
+                    [pTooltip]="'admin.documents.download_tooltip' | translate">
                   </p-button>
                   <p-button 
                     *ngIf="canManageDocuments"
@@ -102,7 +105,7 @@ import { AuthService } from '../../shared/auth/auth.service';
                     severity="danger"
                     size="small"
                     (onClick)="confirmDeleteDocument(document)"
-                    pTooltip="Obriši">
+                    [pTooltip]="'admin.documents.delete_tooltip' | translate">
                   </p-button>
                 </div>
               </td>
@@ -112,7 +115,7 @@ import { AuthService } from '../../shared/auth/auth.service';
           <ng-template pTemplate="emptymessage">
             <tr>
               <td colspan="6" class="text-center">
-                Nema dokumenata za prikaz.
+                {{ 'admin.documents.no_documents' | translate }}
               </td>
             </tr>
           </ng-template>
@@ -121,7 +124,7 @@ import { AuthService } from '../../shared/auth/auth.service';
 
       <!-- Upload Dialog -->
       <p-dialog 
-        header="Učitaj novi dokument"
+        [header]="'admin.documents.upload_dialog_title' | translate"
         [(visible)]="showUploadDialog" 
         [modal]="true"
         [style]="{width: '600px'}">
@@ -133,35 +136,35 @@ import { AuthService } from '../../shared/auth/auth.service';
             [multiple]="false"
             accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.rtf,.odt,.odp,.ods"
             [maxFileSize]="20971520"
-            chooseLabel="Odaberi datoteku"
+            [chooseLabel]="'admin.documents.choose_file' | translate"
             (onSelect)="onFileSelect($event)"
             (onClear)="onFileClear()"
             [disabled]="uploading">
           </p-fileUpload>
 
           <div *ngIf="selectedFile" class="selected-file-info">
-            <h4>Odabrana datoteka:</h4>
-            <p><strong>Naziv:</strong> {{ selectedFile.name }}</p>
-            <p><strong>Veličina:</strong> {{ formatFileSize(selectedFile.size) }}</p>
-            <p><strong>Tip:</strong> {{ selectedFile.type }}</p>
+            <h4>{{ 'admin.documents.selected_file' | translate }}</h4>
+            <p><strong>{{ 'admin.documents.file_name_label' | translate }}</strong> {{ selectedFile.name }}</p>
+            <p><strong>{{ 'admin.documents.file_size_label' | translate }}</strong> {{ formatFileSize(selectedFile.size) }}</p>
+            <p><strong>{{ 'admin.documents.file_type_label' | translate }}</strong> {{ selectedFile.type }}</p>
           </div>
 
           <div *ngIf="uploading" class="upload-progress">
             <p-progressBar mode="indeterminate"></p-progressBar>
-            <p>Učitavanje dokumenta...</p>
+            <p>{{ 'admin.documents.uploading_document' | translate }}</p>
           </div>
         </div>
 
         <ng-template pTemplate="footer">
           <p-button 
-            label="Odustani"
+            [label]="'admin.documents.cancel_button' | translate"
             severity="secondary"
             [outlined]="true"
             (onClick)="closeUploadDialog()"
             [disabled]="uploading">
           </p-button>
           <p-button 
-            label="Učitaj"
+            [label]="'admin.documents.upload_button' | translate"
             [disabled]="!selectedFile || uploading"
             [loading]="uploading"
             (onClick)="uploadDocument()">
@@ -226,10 +229,12 @@ export class DocumentsComponent implements OnInit {
     private documentService: DocumentService,
     private authService: AuthService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.checkPermissions();
     this.loadDocuments();
   }
@@ -281,8 +286,8 @@ export class DocumentsComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Dokument je uspješno učitan.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('admin.documents.document_uploaded')
           });
           this.closeUploadDialog();
           this.loadDocuments();
@@ -294,8 +299,8 @@ export class DocumentsComponent implements OnInit {
     } catch (error) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Greška',
-        detail: 'Greška prilikom čitanja datoteke.'
+        summary: this.translationService.instant('common.error'),
+        detail: this.translationService.instant('admin.documents.document_upload_error')
       });
       this.uploading = false;
     }
@@ -321,9 +326,11 @@ export class DocumentsComponent implements OnInit {
 
   confirmDeleteDocument(document: DocumentDto): void {
     this.confirmationService.confirm({
-      message: `Jeste li sigurni da želite obrisati dokument "${document.fileName}"?`,
-      header: 'Potvrda brisanja',
+      message: this.translationService.instant('admin.documents.confirm_delete_document_message'),
+      header: this.translationService.instant('admin.documents.confirm_delete_document'),
       icon: 'pi pi-exclamation-triangle',
+      acceptLabel: this.translationService.instant('common.yes'),
+      rejectLabel: this.translationService.instant('common.cancel'),
       accept: () => {
         this.deleteDocument(document);
       }
@@ -335,8 +342,8 @@ export class DocumentsComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Dokument je uspješno obrisan.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('admin.documents.document_deleted')
         });
         this.loadDocuments();
       }

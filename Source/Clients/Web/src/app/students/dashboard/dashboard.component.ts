@@ -9,6 +9,7 @@ import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { 
   InternshipsService, 
@@ -25,6 +26,7 @@ import {
   InternshipReportService,
   InternshipReport 
 } from '../services/internship-report.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 // Parsing functions for enum handling
 function parseInternshipStatus(status: any): InternshipStatus {
@@ -63,14 +65,15 @@ function parseStudyLevel(level: any): StudyLevel {
     DividerModule,
     ToastModule,
     SkeletonModule,
-    ProgressBarModule
+    ProgressBarModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h1>Studentski portal</h1>
-        <p>Dobrodošli u sustav za upravljanje stručnom praksom</p>
+        <h1>{{ 'student.dashboard.title' | translate }}</h1>
+        <p>{{ 'student.dashboard.subtitle' | translate }}</p>
       </div>
 
       <!-- Loading State -->
@@ -92,8 +95,8 @@ function parseStudyLevel(level: any): StudyLevel {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ totalInternships }}</div>
-                <div class="stat-label">Ukupno praksi</div>
-                <div class="stat-sublabel">Sve vaše prijave</div>
+                <div class="stat-label">{{ 'student.dashboard.total_internships' | translate }}</div>
+                <div class="stat-sublabel">{{ 'student.dashboard.total_internships_subtitle' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -105,8 +108,8 @@ function parseStudyLevel(level: any): StudyLevel {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ activeInternships }}</div>
-                <div class="stat-label">Aktivne prakse</div>
-                <div class="stat-sublabel">Prihvaćene i u tijeku</div>
+                <div class="stat-label">{{ 'student.dashboard.active_internships' | translate }}</div>
+                <div class="stat-sublabel">{{ 'student.dashboard.active_internships_subtitle' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -118,8 +121,8 @@ function parseStudyLevel(level: any): StudyLevel {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ totalLogEntries }}</div>
-                <div class="stat-label">Dnevnik unosa</div>
-                <div class="stat-sublabel">Ukupno zapisa</div>
+                <div class="stat-label">{{ 'student.dashboard.log_entries' | translate }}</div>
+                <div class="stat-sublabel">{{ 'student.dashboard.log_entries_subtitle' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -131,8 +134,8 @@ function parseStudyLevel(level: any): StudyLevel {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ totalHoursWorked }}</div>
-                <div class="stat-label">Sati rada</div>
-                <div class="stat-sublabel">Ukupno odrađeno</div>
+                <div class="stat-label">{{ 'student.dashboard.work_hours' | translate }}</div>
+                <div class="stat-sublabel">{{ 'student.dashboard.work_hours_subtitle' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -140,11 +143,11 @@ function parseStudyLevel(level: any): StudyLevel {
 
         <!-- Current Internship Progress -->
         @if (currentInternship) {
-          <p-card header="Trenutna praksa" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'student.dashboard.current_internship' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="current-internship">
               <div class="internship-header">
                 <div class="internship-info">
-                  <h3>{{ currentInternship.internshipProvider?.name || 'Nepoznat ponuditelj' }}</h3>
+                  <h3>{{ currentInternship.internshipProvider?.name || ('student.dashboard.unknown_provider' | translate) }}</h3>
                   <div class="internship-details">
                     <p-chip 
                       [label]="getStatusText(currentInternship.status)"
@@ -159,7 +162,7 @@ function parseStudyLevel(level: any): StudyLevel {
                 </div>
                 <div class="internship-actions">
                   <p-button 
-                    label="Dnevnik"
+                    [label]="'student.dashboard.log_button' | translate"
                     icon="pi pi-book"
                     severity="primary"
                     [outlined]="true"
@@ -168,7 +171,7 @@ function parseStudyLevel(level: any): StudyLevel {
                   </p-button>
                   @if (currentInternship.status === InternshipStatus.Completed && currentReport) {
                     <p-button 
-                      label="Izvještaj"
+                      [label]="'student.dashboard.report_button' | translate"
                       icon="pi pi-file-text"
                       severity="info"
                       [outlined]="true"
@@ -181,7 +184,7 @@ function parseStudyLevel(level: any): StudyLevel {
               @if (currentInternship.startDate && currentInternship.endDate) {
                 <div class="internship-timeline">
                   <div class="timeline-info">
-                    <span class="timeline-label">Početak:</span>
+                    <span class="timeline-label">{{ 'student.dashboard.start_label' | translate }}</span>
                     <span>{{ formatDate(currentInternship.startDate) }}</span>
                   </div>
                   <div class="timeline-progress">
@@ -189,10 +192,10 @@ function parseStudyLevel(level: any): StudyLevel {
                       [value]="getInternshipProgress()" 
                       [style]="{'height': '8px', 'border-radius': '4px'}">
                     </p-progressBar>
-                    <div class="progress-text">{{ getInternshipProgress() }}% završeno</div>
+                    <div class="progress-text">{{ getProgressText() }}</div>
                   </div>
                   <div class="timeline-info">
-                    <span class="timeline-label">Završetak:</span>
+                    <span class="timeline-label">{{ 'student.dashboard.end_label' | translate }}</span>
                     <span>{{ formatDate(currentInternship.endDate) }}</span>
                   </div>
                 </div>
@@ -201,27 +204,27 @@ function parseStudyLevel(level: any): StudyLevel {
               @if (currentReport) {
                 <p-divider></p-divider>
                 <div class="report-summary">
-                  <h4>Sažetak izvještaja</h4>
+                  <h4>{{ 'student.dashboard.report_summary' | translate }}</h4>
                   <div class="report-stats">
                     <div class="report-stat">
                       <span class="report-stat-value">{{ currentReport.totalHoursWorked }}</span>
-                      <span class="report-stat-label">Sati rada</span>
+                      <span class="report-stat-label">{{ 'student.dashboard.work_hours_label' | translate }}</span>
                     </div>
                     <div class="report-stat">
                       <span class="report-stat-value">{{ currentReport.totalLogEntries }}</span>
-                      <span class="report-stat-label">Unosa u dnevnik</span>
+                      <span class="report-stat-label">{{ 'student.dashboard.log_entries_label' | translate }}</span>
                     </div>
                     @if (currentReport.grade) {
                       <div class="report-stat">
                         <span class="report-stat-value grade">{{ currentReport.grade }}</span>
-                        <span class="report-stat-label">Ocjena</span>
+                        <span class="report-stat-label">{{ 'student.dashboard.grade_label' | translate }}</span>
                       </div>
                     }
                     <div class="report-stat">
                       <span class="report-stat-value" [class]="currentReport.isConfirmedByMentor ? 'confirmed' : 'pending'">
-                        {{ currentReport.isConfirmedByMentor ? 'DA' : 'NE' }}
+                        {{ currentReport.isConfirmedByMentor ? ('student.dashboard.yes' | translate) : ('student.dashboard.no' | translate) }}
                       </span>
-                      <span class="report-stat-label">Potvrđeno</span>
+                      <span class="report-stat-label">{{ 'student.dashboard.confirmed_label' | translate }}</span>
                     </div>
                   </div>
                 </div>
@@ -231,10 +234,10 @@ function parseStudyLevel(level: any): StudyLevel {
         }
 
         <!-- Quick Actions -->
-        <p-card header="Brze akcije" [style]="{'margin-bottom': '1.5rem'}">
+        <p-card [header]="'student.dashboard.quick_actions' | translate" [style]="{'margin-bottom': '1.5rem'}">
           <div class="quick-actions">
             <p-button 
-              label="Sve prakse"
+              [label]="'student.dashboard.all_internships' | translate"
               icon="pi pi-briefcase"
               severity="primary"
               [outlined]="true"
@@ -243,7 +246,7 @@ function parseStudyLevel(level: any): StudyLevel {
             </p-button>
             @if (currentInternship) {
               <p-button 
-                label="Dnevnik prakse"
+                [label]="'student.dashboard.internship_log' | translate"
                 icon="pi pi-book"
                 severity="secondary"
                 [outlined]="true"
@@ -252,7 +255,7 @@ function parseStudyLevel(level: any): StudyLevel {
               </p-button>
             }
             <p-button 
-              label="Dokumenti"
+              [label]="'student.dashboard.documents' | translate"
               icon="pi pi-file"
               severity="info"
               [outlined]="true"
@@ -264,7 +267,7 @@ function parseStudyLevel(level: any): StudyLevel {
 
         <!-- Recent Activity -->
         @if (recentLogEntries.length > 0) {
-          <p-card header="Nedavni unosi u dnevnik" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'student.dashboard.recent_log_entries' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="recent-logs">
               @for (log of recentLogEntries; track log.id) {
                 <div class="log-entry">
@@ -289,7 +292,7 @@ function parseStudyLevel(level: any): StudyLevel {
             <p-divider></p-divider>
             <div class="view-all-section">
               <p-button 
-                label="Prikaži sve unose"
+                [label]="'student.dashboard.view_all_logs' | translate"
                 icon="pi pi-arrow-right"
                 severity="primary"
                 [text]="true"
@@ -301,13 +304,13 @@ function parseStudyLevel(level: any): StudyLevel {
 
         <!-- All Internships Overview -->
         @if (allInternships.length > 0) {
-          <p-card header="Pregled svih praksi" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'student.dashboard.internships_overview' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="internships-overview">
               @for (internship of allInternships; track internship.id) {
                 <div class="internship-card">
                   <div class="internship-card-header">
                     <div class="internship-card-info">
-                      <h4>{{ internship.internshipProvider?.name || 'Nepoznat ponuditelj' }}</h4>
+                      <h4>{{ internship.internshipProvider?.name || ('student.dashboard.unknown_provider' | translate) }}</h4>
                       <span class="internship-date">{{ formatDate(internship.createdOn) }}</span>
                     </div>
                     <p-chip 
@@ -317,12 +320,12 @@ function parseStudyLevel(level: any): StudyLevel {
                   </div>
                   <div class="internship-card-details">
                     @if (internship.startDate) {
-                      <span><strong>Početak:</strong> {{ formatDate(internship.startDate) }}</span>
+                      <span><strong>{{ 'student.dashboard.start_colon' | translate }}</strong> {{ formatDate(internship.startDate) }}</span>
                     }
                     @if (internship.endDate) {
-                      <span><strong>Završetak:</strong> {{ formatDate(internship.endDate) }}</span>
+                      <span><strong>{{ 'student.dashboard.end_colon' | translate }}</strong> {{ formatDate(internship.endDate) }}</span>
                     }
-                    <span><strong>Razina:</strong> {{ getStudyLevelText(internship.studyLevel) }}</span>
+                    <span><strong>{{ 'student.dashboard.level_colon' | translate }}</strong> {{ getStudyLevelText(internship.studyLevel) }}</span>
                   </div>
                   <div class="internship-card-actions">
                     @if (internship.status === InternshipStatus.Accepted || internship.status === InternshipStatus.Completed) {
@@ -867,10 +870,12 @@ export class StudentDashboardComponent implements OnInit {
     private internshipLogService: InternshipLogService,
     private internshipReportService: InternshipReportService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadDashboardData();
   }
 
@@ -892,7 +897,7 @@ export class StudentDashboardComponent implements OnInit {
       this.calculateStatistics();
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      this.showError('Greška pri učitavanju podataka.');
+      this.showError(this.translationService.instant('student.dashboard.loading_error'));
     } finally {
       this.loading = false;
     }
@@ -1000,21 +1005,21 @@ export class StudentDashboardComponent implements OnInit {
   getStatusText(status: InternshipStatus | string | number): string {
     if (typeof status === 'string') {
       switch (status) {
-        case 'Pending': return 'Na čekanju';
-        case 'Accepted': return 'Prihvaćeno';
-        case 'Rejected': return 'Odbačeno';
-        case 'Completed': return 'Završeno';
-        default: return 'Nepoznato';
+        case 'Pending': return this.translationService.instant('common.statuses.pending');
+        case 'Accepted': return this.translationService.instant('common.statuses.accepted');
+        case 'Rejected': return this.translationService.instant('common.statuses.rejected');
+        case 'Completed': return this.translationService.instant('common.statuses.completed');
+        default: return this.translationService.instant('common.unknown');
       }
     }
     
     const numericStatus = Number(status);
     switch (numericStatus) {
-      case InternshipStatus.Pending: return 'Na čekanju';
-      case InternshipStatus.Accepted: return 'Prihvaćeno';
-      case InternshipStatus.Rejected: return 'Odbačeno';
-      case InternshipStatus.Completed: return 'Završeno';
-      default: return 'Nepoznato';
+      case InternshipStatus.Pending: return this.translationService.instant('common.statuses.pending');
+      case InternshipStatus.Accepted: return this.translationService.instant('common.statuses.accepted');
+      case InternshipStatus.Rejected: return this.translationService.instant('common.statuses.rejected');
+      case InternshipStatus.Completed: return this.translationService.instant('common.statuses.completed');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -1042,17 +1047,17 @@ export class StudentDashboardComponent implements OnInit {
   getStudyLevelText(level: StudyLevel | string | number): string {
     if (typeof level === 'string') {
       switch (level) {
-        case 'Undergraduate': return 'Preddiplomski';
-        case 'Graduate': return 'Diplomski';
-        default: return 'Nepoznato';
+        case 'Undergraduate': return this.translationService.instant('common.study_levels.undergraduate');
+        case 'Graduate': return this.translationService.instant('common.study_levels.graduate');
+        default: return this.translationService.instant('common.unknown');
       }
     }
     
     const numericLevel = Number(level);
     switch (numericLevel) {
-      case StudyLevel.Undergraduate: return 'Preddiplomski';
-      case StudyLevel.Graduate: return 'Diplomski';
-      default: return 'Nepoznato';
+      case StudyLevel.Undergraduate: return this.translationService.instant('common.study_levels.undergraduate');
+      case StudyLevel.Graduate: return this.translationService.instant('common.study_levels.graduate');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -1076,10 +1081,10 @@ export class StudentDashboardComponent implements OnInit {
   getLogStatusText(status: InternshipLogStatus | string): string {
     const numericStatus = typeof status === 'string' ? parseInt(status) : status;
     switch (numericStatus) {
-      case InternshipLogStatus.Complete: return 'Završeno';
-      case InternshipLogStatus.InProgress: return 'U tijeku';
-      case InternshipLogStatus.Unfinished: return 'Nedovršeno';
-      default: return 'Nepoznato';
+      case InternshipLogStatus.Complete: return this.translationService.instant('student.dashboard.log_status_complete');
+      case InternshipLogStatus.InProgress: return this.translationService.instant('student.dashboard.log_status_in_progress');
+      case InternshipLogStatus.Unfinished: return this.translationService.instant('student.dashboard.log_status_unfinished');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -1097,10 +1102,10 @@ export class StudentDashboardComponent implements OnInit {
     const numericLocation = typeof location === 'string' ? parseInt(location) : location;
     // Based on WorkLocation enum from the service
     switch (numericLocation) {
-      case 1: return 'Na lokaciji';
-      case 2: return 'Udaljeno';
-      case 3: return 'Hibridno';
-      default: return 'Nepoznato';
+      case 1: return this.translationService.instant('student.dashboard.location_on_site');
+      case 2: return this.translationService.instant('student.dashboard.location_remote');
+      case 3: return this.translationService.instant('student.dashboard.location_hybrid');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -1120,6 +1125,11 @@ export class StudentDashboardComponent implements OnInit {
     const elapsed = now.getTime() - start.getTime();
     
     return Math.round((elapsed / total) * 100);
+  }
+
+  getProgressText(): string {
+    const progress = this.getInternshipProgress();
+    return this.translationService.instant('student.dashboard.completed_percentage', { progress });
   }
 
   formatDate(dateString?: string): string {
@@ -1148,7 +1158,7 @@ export class StudentDashboardComponent implements OnInit {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message,
       life: 5000
     });

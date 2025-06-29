@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/auth/auth.service';
 import { ToastModule } from 'primeng/toast';
+import { TranslateModule } from '@ngx-translate/core';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-student-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastModule],
+  imports: [CommonModule, FormsModule, ToastModule, TranslateModule],
   template: `
     <div class="register-main-container">
       <div class="register-container">
@@ -17,13 +19,12 @@ import { ToastModule } from 'primeng/toast';
             <img src="assets/images/aai-logo.png" alt="AAI@EduHr Logo" class="aai-logo">
           </div>
           <div class="subtitle">
-            <p>Autentikacijska i autorizacijska infrastruktura znanosti i</p>
-            <p>visokog obrazovanja u Republici Hrvatskoj</p>
+            <p>{{ 'auth.aai_subtitle' | translate }}</p>
           </div>
-          <h2>Registracija studenta</h2>
+          <h2>{{ 'auth.register.title' | translate }}</h2>
           <form (ngSubmit)="onSubmit()" class="register-form">
             <div class="input-section">
-              <h3>IME</h3>
+              <h3>{{ 'auth.register.name_label' | translate }}</h3>
               <div class="input-with-icon">
                 <i class="fa-solid fa-user user-icon"></i>
                 <input 
@@ -33,12 +34,12 @@ import { ToastModule } from 'primeng/toast';
                   name="firstName" 
                   required 
                   class="register-input"
-                  placeholder="Unesite ime"
+                  [placeholder]="'auth.register.name_placeholder' | translate"
                 >
               </div>
             </div>
             <div class="input-section">
-              <h3>PREZIME</h3>
+              <h3>{{ 'auth.register.surname_label' | translate }}</h3>
               <div class="input-with-icon">
                 <i class="fa-solid fa-user user-icon"></i>
                 <input 
@@ -48,7 +49,7 @@ import { ToastModule } from 'primeng/toast';
                   name="lastName" 
                   required 
                   class="register-input"
-                  placeholder="Unesite prezime"
+                  [placeholder]="'auth.register.surname_placeholder' | translate"
                 >
               </div>
             </div>
@@ -134,6 +135,8 @@ import { ToastModule } from 'primeng/toast';
     .aai-logo {
       max-width: 200px;
       height: auto;
+      display: block;
+      margin: 0 auto;
     }
 
     .subtitle {
@@ -268,18 +271,129 @@ import { ToastModule } from 'primeng/toast';
       text-decoration: underline;
     }
 
+    /* Mobile Responsive Styles */
     @media (max-width: 768px) {
-      .register-card {
-        padding: 2rem 1.5rem;
-      }
-      
       .register-main-container {
         padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+      }
+
+      .register-card {
+        padding: 2rem 1.5rem;
+        margin: 0 10px;
+      }
+
+      .aai-logo {
+        max-width: 150px;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .register-form {
+        gap: 1.25rem;
+      }
+
+      .input-section h3 {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .register-input {
+        padding: 0.875rem 0.875rem 0.875rem 40px;
+        font-size: 0.9rem;
+      }
+
+      .user-icon, .email-icon, .lock-icon {
+        left: 12px;
+        font-size: 1rem;
+      }
+
+      .password-toggle-icon {
+        right: 12px;
+        font-size: 1rem;
+      }
+
+      .register-button {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
+        margin-top: 0.75rem;
+      }
+
+      .login-link {
+        margin-top: 1.25rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Small mobile screens */
+    @media (max-width: 480px) {
+      .register-main-container {
+        padding: 5px;
+        padding-top: 15px;
+      }
+
+      .register-card {
+        padding: 1.5rem 1rem;
+        margin: 0;
+      }
+
+      .aai-logo {
+        max-width: 120px;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+
+      .subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .register-form {
+        gap: 1rem;
+      }
+
+      .input-section h3 {
+        font-size: 0.75rem;
+      }
+
+      .register-input {
+        padding: 0.75rem 0.75rem 0.75rem 35px;
+        font-size: 0.85rem;
+      }
+
+      .user-icon, .email-icon, .lock-icon {
+        left: 10px;
+        font-size: 0.9rem;
+      }
+
+      .password-toggle-icon {
+        right: 10px;
+        font-size: 0.9rem;
+      }
+
+      .register-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .login-link {
+        font-size: 0.8rem;
       }
     }
   `]
 })
-export class StudentRegisterComponent {
+export class StudentRegisterComponent implements OnInit {
   firstName: string = '';
   lastName: string = '';
   emailAddress: string = '';
@@ -289,8 +403,14 @@ export class StudentRegisterComponent {
 
   constructor(
     private router: Router, 
-    private authService: AuthService
+    private authService: AuthService,
+    private translationService: TranslationService
   ) {}
+
+  ngOnInit(): void {
+    // Initialize translations first
+    this.translationService.initializeLanguage();
+  }
 
   onSubmit() {
     if (!this.firstName || !this.lastName || !this.emailAddress || !this.password) {

@@ -5,9 +5,11 @@ import { FormsModule } from '@angular/forms';
 // PrimeNG Imports
 import { ToastModule } from 'primeng/toast';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { MessageService } from 'primeng/api';
 import { DocumentService, DocumentDto } from '../../shared/services/document.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-student-documents',
@@ -16,14 +18,15 @@ import { DocumentService, DocumentDto } from '../../shared/services/document.ser
     CommonModule,
     FormsModule,
     ToastModule,
-    ProgressBarModule
+    ProgressBarModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="documents-container">
       <div class="overlay"></div>
       <div class="content-wrapper">
-        <h1 class="title">Dokumenti</h1>
+        <h1 class="title">{{ 'student.documents.title' | translate }}</h1>
 
         <div class="card">
           <ul class="documents-list" *ngIf="!loading; else loadingTpl">
@@ -32,7 +35,7 @@ import { DocumentService, DocumentDto } from '../../shared/services/document.ser
               <span class="file-name">{{ document.fileName }}</span>
             </li>
             <li *ngIf="!filteredDocuments.length" class="empty-message">
-              Nema dokumenata za prikaz.
+              {{ 'student.documents.no_documents' | translate }}
             </li>
           </ul>
         </div>
@@ -142,10 +145,12 @@ export class StudentDocumentsComponent implements OnInit {
 
   constructor(
     private documentService: DocumentService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadDocuments();
   }
 

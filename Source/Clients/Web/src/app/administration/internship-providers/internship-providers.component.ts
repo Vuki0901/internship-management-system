@@ -8,8 +8,11 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
+import { TranslateModule } from '@ngx-translate/core';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { InternshipProviderService, InternshipProviderDto, CreateInternshipProviderRequest, UpdateInternshipProviderRequest } from '../services/internship-provider.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-internship-providers',
@@ -23,18 +26,20 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
     InputTextModule,
     ToastModule,
     ConfirmDialogModule,
-    CardModule
+    CardModule,
+    TranslateModule,
+    TooltipModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="page-container">
       <header class="page-header">
         <div class="header-content">
-          <h1>Ponuditelji prakse</h1>
-          <p>Upravljanje ponuditeljima prakse u sustavu</p>
+          <h1>{{ 'admin.providers.title' | translate }}</h1>
+          <p>{{ 'admin.providers.subtitle' | translate }}</p>
         </div>
         <p-button 
-          label="Dodaj ponuditelja"
+          [label]="'admin.providers.add_provider' | translate"
           icon="pi pi-plus"
           [style]="{'background-color': 'var(--primary-color)', 'border-color': 'var(--primary-color)'}"
           (onClick)="openProviderDialog()">
@@ -47,7 +52,7 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
             <i class="pi pi-search search-icon"></i>
             <input 
               type="text" 
-              placeholder="Pretraži ponuditelje prakse"
+              [placeholder]="'admin.providers.search_providers' | translate"
               class="search-input"
               [(ngModel)]="searchText"
               (ngModelChange)="filterProviders()">
@@ -55,7 +60,7 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
           <div class="stats-container">
             <div class="stat-item">
               <span class="stat-number">{{ filteredProviders.length }}</span>
-              <span class="stat-label">Ukupno ponuditelja</span>
+              <span class="stat-label">{{ 'admin.providers.total_providers' | translate }}</span>
             </div>
           </div>
         </div>
@@ -68,11 +73,11 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
 
           <ng-template pTemplate="header">
             <tr>
-              <th>Naziv</th>
-              <th>OIB</th>
-              <th>Adresa</th>
-              <th>Kontakt podaci</th>
-              <th style="width: 12rem">Akcije</th>
+              <th>{{ 'admin.providers.company_name' | translate }}</th>
+              <th>{{ 'admin.providers.oib' | translate }}</th>
+              <th>{{ 'admin.providers.address' | translate }}</th>
+              <th>{{ 'admin.providers.contact_info' | translate }}</th>
+              <th style="width: 12rem">{{ 'admin.providers.actions' | translate }}</th>
             </tr>
           </ng-template>
 
@@ -102,7 +107,7 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     <i class="pi pi-phone contact-icon"></i>
                     <span>{{ provider.contactPhoneNumber }}</span>
                   </div>
-                  <span *ngIf="!provider.contactEmailAddress && !provider.contactPhoneNumber" class="no-contact">Nema kontakt podataka</span>
+                  <span *ngIf="!provider.contactEmailAddress && !provider.contactPhoneNumber" class="no-contact">{{ 'admin.providers.no_contact_info' | translate }}</span>
                 </div>
               </td>
               <td>
@@ -114,7 +119,7 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     size="small"
                     class="action-btn edit-btn"
                     (onClick)="editProvider(provider)"
-                    pTooltip="Uredi">
+                    [pTooltip]="'admin.providers.edit_tooltip' | translate">
                   </p-button>
                   <p-button 
                     icon="pi pi-trash"
@@ -123,7 +128,7 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     size="small"
                     class="action-btn delete-btn"
                     (onClick)="confirmDelete(provider)"
-                    pTooltip="Obriši">
+                    [pTooltip]="'admin.providers.delete_tooltip' | translate">
                   </p-button>
                 </div>
               </td>
@@ -135,8 +140,8 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
               <td colspan="5" class="text-center">
                 <div class="empty-state">
                   <i class="pi pi-building empty-icon"></i>
-                  <h3>Nema ponuditelja prakse</h3>
-                  <p>Dodajte prvi ponuditelja prakse u sustav</p>
+                  <h3>{{ 'admin.providers.no_providers' | translate }}</h3>
+                  <p>{{ 'admin.providers.add_first_provider' | translate }}</p>
                 </div>
               </td>
             </tr>
@@ -146,7 +151,7 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
 
       <!-- Provider Dialog -->
       <p-dialog 
-        [header]="editingProvider ? 'Uredi ponuditelja prakse' : 'Dodaj novog ponuditelja prakse'"
+        [header]="editingProvider ? ('admin.providers.edit_provider' | translate) : ('admin.providers.add_new_provider' | translate)"
         [(visible)]="showProviderDialog" 
         [modal]="true"
         [style]="{width: '700px'}"
@@ -157,11 +162,11 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
         <div class="dialog-content">
           <form (ngSubmit)="saveProvider()" class="provider-form">
             <div class="form-section">
-              <h4 class="section-title">Osnovni podaci</h4>
+              <h4 class="section-title">{{ 'admin.providers.basic_info' | translate }}</h4>
               
               <div class="form-row">
                 <div class="form-group">
-                  <label for="name">Naziv ponuditelja *</label>
+                  <label for="name">{{ 'admin.providers.provider_name' | translate }}</label>
                   <input 
                     id="name"
                     type="text"
@@ -170,11 +175,11 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     name="name"
                     required
                     class="w-full"
-                    placeholder="Unesite naziv tvrtke ili organizacije">
+                    [placeholder]="'admin.providers.provider_name_placeholder' | translate">
                 </div>
                 
                 <div class="form-group">
-                  <label for="personalIdentificationNumber">OIB</label>
+                  <label for="personalIdentificationNumber">{{ 'admin.providers.oib' | translate }}</label>
                   <input 
                     id="personalIdentificationNumber"
                     type="text"
@@ -183,12 +188,12 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     name="personalIdentificationNumber"
                     maxlength="11"
                     class="w-full"
-                    placeholder="Unesite OIB (11 znamenki)">
+                    [placeholder]="'admin.providers.oib_placeholder' | translate">
                 </div>
               </div>
 
               <div class="form-group mt-4">
-                <label for="address">Adresa</label>
+                <label for="address">{{ 'admin.providers.address' | translate }}</label>
                 <input 
                   id="address"
                   type="text"
@@ -196,16 +201,16 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                   [(ngModel)]="providerForm.address"
                   name="address"
                   class="w-full"
-                  placeholder="Unesite punu adresu">
+                  [placeholder]="'admin.providers.address_placeholder' | translate">
               </div>
             </div>
 
             <div class="form-section">
-              <h4 class="section-title">Kontakt podaci</h4>
+              <h4 class="section-title">{{ 'admin.providers.contact_info_section' | translate }}</h4>
               
               <div class="form-row">
                 <div class="form-group">
-                  <label for="contactEmailAddress">Email adresa</label>
+                  <label for="contactEmailAddress">{{ 'admin.providers.contact_email' | translate }}</label>
                   <input 
                     id="contactEmailAddress"
                     type="email"
@@ -213,11 +218,11 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     [(ngModel)]="providerForm.contactEmailAddress"
                     name="contactEmailAddress"
                     class="w-full"
-                    placeholder="kontakt@ponuditelj.hr">
+                    [placeholder]="'admin.providers.contact_email_placeholder' | translate">
                 </div>
                 
                 <div class="form-group">
-                  <label for="contactPhoneNumber">Broj telefona</label>
+                  <label for="contactPhoneNumber">{{ 'admin.providers.contact_phone' | translate }}</label>
                   <input 
                     id="contactPhoneNumber"
                     type="tel"
@@ -225,21 +230,21 @@ import { InternshipProviderService, InternshipProviderDto, CreateInternshipProvi
                     [(ngModel)]="providerForm.contactPhoneNumber"
                     name="contactPhoneNumber"
                     class="w-full"
-                    placeholder="+385 1 234 5678">
+                    [placeholder]="'admin.providers.contact_phone_placeholder' | translate">
                 </div>
               </div>
             </div>
 
             <div class="dialog-actions">
               <p-button 
-                label="Odustani"
+                [label]="'common.cancel' | translate"
                 type="button"
                 severity="secondary"
                 [outlined]="true"
                 (onClick)="closeProviderDialog()">
               </p-button>
               <p-button 
-                label="Spremi"
+                [label]="'common.save' | translate"
                 type="submit"
                 [loading]="saving"
                 [style]="{'background-color': 'var(--primary-color)', 'border-color': 'var(--primary-color)'}">
@@ -595,10 +600,12 @@ export class InternshipProvidersComponent implements OnInit {
   constructor(
     private providerService: InternshipProviderService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadProviders();
   }
 
@@ -664,8 +671,8 @@ export class InternshipProvidersComponent implements OnInit {
     if (!this.providerForm.name || this.providerForm.name.trim() === '') {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Upozorenje',
-        detail: 'Naziv ponuditelja je obavezan.'
+        summary: this.translationService.instant('common.warning'),
+        detail: this.translationService.instant('admin.providers.provider_name_required')
       });
       return;
     }
@@ -687,8 +694,8 @@ export class InternshipProvidersComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Ponuditelj prakse je uspješno ažuriran.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('admin.providers.provider_updated')
           });
           this.loadProviders();
           this.closeProviderDialog();
@@ -711,8 +718,8 @@ export class InternshipProvidersComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Novi ponuditelj prakse je uspješno kreiran.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('admin.providers.provider_created')
           });
           this.loadProviders();
           this.closeProviderDialog();
@@ -726,11 +733,11 @@ export class InternshipProvidersComponent implements OnInit {
 
   confirmDelete(provider: InternshipProviderDto): void {
     this.confirmationService.confirm({
-      message: `Jeste li sigurni da želite obrisati ponuditelja "${provider.name}"? Ova akcija se ne može poništiti.`,
-      header: 'Potvrda brisanja',
+      message: this.translationService.instant('admin.providers.confirm_delete_message'),
+      header: this.translationService.instant('admin.providers.confirm_delete'),
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Da, obriši',
-      rejectLabel: 'Odustani',
+      acceptLabel: this.translationService.instant('common.yes'),
+      rejectLabel: this.translationService.instant('common.cancel'),
       accept: () => {
         this.deleteProvider(provider.id);
       }
@@ -742,8 +749,8 @@ export class InternshipProvidersComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Ponuditelj prakse je uspješno obrisan.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('admin.providers.provider_deleted')
         });
         this.loadProviders();
       }

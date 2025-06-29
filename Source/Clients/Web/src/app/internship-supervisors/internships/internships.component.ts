@@ -11,6 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ChipModule } from 'primeng/chip';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { 
   InternshipSupervisorService, 
@@ -19,6 +20,7 @@ import {
   StudyLevel,
   InternshipProviderInfo
 } from '../services/internship-supervisor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-supervisor-internships',
@@ -34,14 +36,15 @@ import {
     InputTextModule,
     ChipModule,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Sve prakse</h1>
-        <p>Pregled svih praksi u sustavu</p>
+        <h1>{{ 'pages.all_internships' | translate }}</h1>
+        <p>{{ 'pages.all_internships_subtitle' | translate }}</p>
       </header>
 
       <div class="content-wrapper">
@@ -49,25 +52,25 @@ import {
         <p-card class="filters-card">
           <div class="filters-grid">
             <div class="filter-group">
-              <label for="search">Pretraživanje</label>
+              <label for="search">{{ 'filters.search' | translate }}</label>
               <input 
                 pInputText 
                 id="search"
                 [(ngModel)]="searchTerm" 
-                placeholder="Pretraži po nazivu ili adresi ponuditelja..."
+                [placeholder]="'filters.search_placeholder' | translate"
                 (input)="onSearchChange()"
                 class="search-input">
             </div>
             
             <div class="filter-group">
-              <label for="status">Status</label>
+              <label for="status">{{ 'tables.status' | translate }}</label>
               <p-dropdown 
                 id="status"
                 [options]="statusOptions" 
                 [(ngModel)]="selectedStatus"
                 optionLabel="label" 
                 optionValue="value"
-                placeholder="Svi statusi"
+                [placeholder]="'filters.all_statuses' | translate"
                 [showClear]="true"
                 (onChange)="onFilterChange()"
                 class="filter-dropdown">
@@ -75,14 +78,14 @@ import {
             </div>
             
             <div class="filter-group">
-              <label for="provider">Ponuditelj</label>
+              <label for="provider">{{ 'tables.provider' | translate }}</label>
               <p-dropdown 
                 id="provider"
                 [options]="providerOptions" 
                 [(ngModel)]="selectedProviderId"
                 optionLabel="label" 
                 optionValue="value"
-                placeholder="Svi ponuditelji"
+                [placeholder]="'filters.all_providers' | translate"
                 [showClear]="true"
                 (onChange)="onFilterChange()"
                 class="filter-dropdown">
@@ -94,32 +97,32 @@ import {
         <!-- Results -->
         <p-card class="results-card">
           <div class="results-header">
-            <h3>Rezultati ({{ totalCount }})</h3>
+            <h3>{{ 'tables.results' | translate }} ({{ totalCount }})</h3>
           </div>
 
           @if (loading) {
             <div class="loading-container">
               <p-progressSpinner></p-progressSpinner>
-              <p>Učitavanje praksi...</p>
+              <p>{{ 'tables.loading' | translate }}</p>
             </div>
           } @else if (internships.length === 0) {
             <div class="no-results">
               <i class="fa-solid fa-search"></i>
-              <h3>Nema rezultata</h3>
-              <p>Nema praksi koje odgovaraju vašim kriterijima pretrage.</p>
+              <h3>{{ 'tables.no_results' | translate }}</h3>
+              <p>{{ 'tables.no_data_found' | translate }}</p>
             </div>
           } @else {
             <p-table [value]="internships" [responsive]="true">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Student</th>
-                  <th>Ponuditelj</th>
-                  <th>Razina studija</th>
-                  <th>Status</th>
-                  <th>Datum početka</th>
-                  <th>Datum završetka</th>
-                  <th>Mentor</th>
-                  <th>Akcije</th>
+                  <th>{{ 'tables.student' | translate }}</th>
+                  <th>{{ 'tables.provider' | translate }}</th>
+                  <th>{{ 'tables.study_level' | translate }}</th>
+                  <th>{{ 'tables.status' | translate }}</th>
+                  <th>{{ 'tables.start_date' | translate }}</th>
+                  <th>{{ 'tables.end_date' | translate }}</th>
+                  <th>{{ 'tables.mentor' | translate }}</th>
+                  <th>{{ 'tables.actions' | translate }}</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-internship>
@@ -171,7 +174,7 @@ import {
                   <td>
                     @if (internship.status === InternshipStatus.Completed) {
                       <p-button 
-                        label="Izvještaj" 
+                        [label]="'tables.report' | translate" 
                         icon="pi pi-file-text" 
                         size="small"
                         severity="info"
@@ -193,7 +196,7 @@ import {
               [first]="(currentPage - 1) * pageSize"
               (onPageChange)="onPageChange($event)"
               [showCurrentPageReport]="true"
-              currentPageReportTemplate="Prikazuje {first} do {last} od {totalRecords} rezultata">
+              [currentPageReportTemplate]="'tables.showing' | translate">
             </p-paginator>
           }
         </p-card>
@@ -388,12 +391,7 @@ export class SupervisorInternshipsComponent implements OnInit {
   selectedProviderId: string | null = null;
   
   // Dropdown options
-  statusOptions = [
-    { label: 'Na čekanju', value: InternshipStatus.Pending },
-    { label: 'Prihvaćeno', value: InternshipStatus.Accepted },
-    { label: 'Odbačeno', value: InternshipStatus.Rejected },
-    { label: 'Završeno', value: InternshipStatus.Completed }
-  ];
+  statusOptions: { label: string; value: InternshipStatus }[] = [];
   
   providerOptions: { label: string; value: string }[] = [];
   
@@ -405,12 +403,24 @@ export class SupervisorInternshipsComponent implements OnInit {
   constructor(
     private supervisorService: InternshipSupervisorService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
+    this.initializeStatusOptions();
     this.loadProviders();
     this.loadInternships();
+  }
+
+  private initializeStatusOptions(): void {
+    this.statusOptions = [
+      { label: this.translationService.instant('status.pending'), value: InternshipStatus.Pending },
+      { label: this.translationService.instant('status.accepted'), value: InternshipStatus.Accepted },
+      { label: this.translationService.instant('status.rejected'), value: InternshipStatus.Rejected },
+      { label: this.translationService.instant('status.completed'), value: InternshipStatus.Completed }
+    ];
   }
 
   loadProviders(): void {
@@ -424,7 +434,7 @@ export class SupervisorInternshipsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading providers:', error);
-        this.showError('Greška pri učitavanju ponuditelja prakse.');
+        this.showError(this.translationService.instant('errors.loading_providers'));
       }
     });
   }
@@ -447,7 +457,7 @@ export class SupervisorInternshipsComponent implements OnInit {
       error: (error) => {
         console.error('Error loading internships:', error);
         this.loading = false;
-        this.showError('Greška pri učitavanju praksi.');
+        this.showError(this.translationService.instant('errors.loading_internships'));
       }
     });
   }
@@ -483,22 +493,22 @@ export class SupervisorInternshipsComponent implements OnInit {
     // Handle string values from backend
     if (typeof status === 'string') {
       switch (status) {
-        case 'Pending': return 'Na čekanju';
-        case 'Accepted': return 'Prihvaćeno';
-        case 'Rejected': return 'Odbačeno';
-        case 'Completed': return 'Završeno';
-        default: return 'Nepoznato';
+        case 'Pending': return this.translationService.instant('status.pending');
+        case 'Accepted': return this.translationService.instant('status.accepted');
+        case 'Rejected': return this.translationService.instant('status.rejected');
+        case 'Completed': return this.translationService.instant('status.completed');
+        default: return this.translationService.instant('status.unknown');
       }
     }
     
     // Handle numeric enum values
     const numericStatus = Number(status);
     switch (numericStatus) {
-      case InternshipStatus.Pending: return 'Na čekanju';
-      case InternshipStatus.Accepted: return 'Prihvaćeno';
-      case InternshipStatus.Rejected: return 'Odbačeno';
-      case InternshipStatus.Completed: return 'Završeno';
-      default: return 'Nepoznato';
+      case InternshipStatus.Pending: return this.translationService.instant('status.pending');
+      case InternshipStatus.Accepted: return this.translationService.instant('status.accepted');
+      case InternshipStatus.Rejected: return this.translationService.instant('status.rejected');
+      case InternshipStatus.Completed: return this.translationService.instant('status.completed');
+      default: return this.translationService.instant('status.unknown');
     }
   }
 
@@ -529,18 +539,18 @@ export class SupervisorInternshipsComponent implements OnInit {
     // Handle string values from backend
     if (typeof level === 'string') {
       switch (level) {
-        case 'Undergraduate': return 'Preddiplomski';
-        case 'Graduate': return 'Diplomski';
-        default: return 'Nepoznato';
+        case 'Undergraduate': return this.translationService.instant('status.undergraduate');
+        case 'Graduate': return this.translationService.instant('status.graduate');
+        default: return this.translationService.instant('status.unknown');
       }
     }
     
     // Handle numeric enum values
     const numericLevel = Number(level);
     switch (numericLevel) {
-      case StudyLevel.Undergraduate: return 'Preddiplomski';
-      case StudyLevel.Graduate: return 'Diplomski';
-      default: return 'Nepoznato';
+      case StudyLevel.Undergraduate: return this.translationService.instant('status.undergraduate');
+      case StudyLevel.Graduate: return this.translationService.instant('status.graduate');
+      default: return this.translationService.instant('status.unknown');
     }
   }
 
@@ -577,7 +587,7 @@ export class SupervisorInternshipsComponent implements OnInit {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message,
       life: 5000
     });

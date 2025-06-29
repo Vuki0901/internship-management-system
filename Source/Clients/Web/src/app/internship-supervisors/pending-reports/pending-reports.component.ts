@@ -7,6 +7,7 @@ import { TableModule } from 'primeng/table';
 import { ChipModule } from 'primeng/chip';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { 
   InternshipSupervisorService, 
@@ -14,6 +15,7 @@ import {
   InternshipStatus, 
   StudyLevel
 } from '../services/internship-supervisor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-supervisor-pending-reports',
@@ -25,24 +27,25 @@ import {
     TableModule,
     ChipModule,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Čekaju ocjenu</h1>
-        <p>Izvještaji koji čekaju vašu ocjenu</p>
+        <h1>{{ 'supervisor.pending_reports.title' | translate }}</h1>
+        <p>{{ 'supervisor.pending_reports.subtitle' | translate }}</p>
       </header>
 
       <div class="content-wrapper">
         <p-card class="reports-card">
           <div class="reports-header">
-            <h3>Izvještaji za ocjenjivanje ({{ pendingReports.length }})</h3>
+            <h3>{{ 'supervisor.pending_reports.title' | translate }} ({{ pendingReports.length }})</h3>
             @if (pendingReports.length > 0) {
               <p class="priority-note">
                 <i class="fa-solid fa-info-circle"></i>
-                Izvještaji su poredani po datumu potvrde mentora
+                {{ 'supervisor.pending_reports.sorted_by_confirmation' | translate }}
               </p>
             }
           </div>
@@ -50,26 +53,26 @@ import {
           @if (loading) {
             <div class="loading-container">
               <p-progressSpinner></p-progressSpinner>
-              <p>Učitavanje izvještaja...</p>
+              <p>{{ 'supervisor.pending_reports.loading' | translate }}</p>
             </div>
           } @else if (pendingReports.length === 0) {
             <div class="no-reports">
               <i class="fa-solid fa-clipboard-check"></i>
-              <h3>Nema izvještaja za ocjenjivanje</h3>
-              <p>Trenutno nema izvještaja koji čekaju vašu ocjenu.</p>
+              <h3>{{ 'supervisor.pending_reports.no_pending_reports' | translate }}</h3>
+              <p>{{ 'supervisor.pending_reports.no_pending_reports_message' | translate }}</p>
             </div>
           } @else {
             <p-table [value]="pendingReports" [responsive]="true">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Student</th>
-                  <th>Ponuditelj</th>
-                  <th>Razina studija</th>
-                  <th>Ukupno sati</th>
-                  <th>Broj unosa</th>
-                  <th>Potvrđeno</th>
-                  <th>Mentor</th>
-                  <th>Akcije</th>
+                  <th>{{ 'supervisor.pending_reports.student' | translate }}</th>
+                  <th>{{ 'supervisor.pending_reports.provider' | translate }}</th>
+                  <th>{{ 'supervisor.pending_reports.study_level' | translate }}</th>
+                  <th>{{ 'common.total_hours' | translate }}</th>
+                  <th>{{ 'common.log_entries' | translate }}</th>
+                  <th>{{ 'common.confirmed' | translate }}</th>
+                  <th>{{ 'common.mentor' | translate }}</th>
+                  <th>{{ 'supervisor.pending_reports.actions' | translate }}</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-report>
@@ -114,7 +117,7 @@ import {
                     <div class="confirmed-info">
                       <small>{{ formatDate(report.confirmedAt) }}</small>
                       <div class="days-waiting">
-                        {{ getDaysWaiting(report.confirmedAt) }} dana
+                        {{ getDaysWaitingText(report.confirmedAt) }}
                       </div>
                     </div>
                   </td>
@@ -131,7 +134,7 @@ import {
                   <td>
                     <div class="action-buttons">
                       <p-button 
-                        label="Ocijeni" 
+                        [label]="'supervisor.pending_reports.grade_report' | translate" 
                         icon="pi pi-star" 
                         size="small"
                         severity="success"
@@ -139,7 +142,7 @@ import {
                         [style]="{'font-size': '0.8rem', 'margin-right': '0.5rem'}">
                       </p-button>
                       <p-button 
-                        label="Pregled" 
+                        [label]="'common.view' | translate" 
                         icon="pi pi-eye" 
                         size="small"
                         severity="info"
@@ -348,10 +351,14 @@ export class SupervisorPendingReportsComponent implements OnInit {
   constructor(
     private supervisorService: InternshipSupervisorService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    // Initialize translations
+    this.translationService.initializeLanguage();
+    
     this.loadPendingReports();
   }
 
@@ -366,7 +373,7 @@ export class SupervisorPendingReportsComponent implements OnInit {
       error: (error) => {
         console.error('Error loading pending reports:', error);
         this.loading = false;
-        this.showError('Greška pri učitavanju izvještaja.');
+        this.showError(this.translationService.instant('supervisor.pending_reports.loading_error'));
       }
     });
   }
@@ -385,18 +392,18 @@ export class SupervisorPendingReportsComponent implements OnInit {
     // Handle string values from backend
     if (typeof level === 'string') {
       switch (level) {
-        case 'Undergraduate': return 'Preddiplomski';
-        case 'Graduate': return 'Diplomski';
-        default: return 'Nepoznato';
+        case 'Undergraduate': return this.translationService.instant('common.study_level.undergraduate');
+        case 'Graduate': return this.translationService.instant('common.study_level.graduate');
+        default: return this.translationService.instant('common.unknown');
       }
     }
     
     // Handle numeric enum values
     const numericLevel = Number(level);
     switch (numericLevel) {
-      case StudyLevel.Undergraduate: return 'Preddiplomski';
-      case StudyLevel.Graduate: return 'Diplomski';
-      default: return 'Nepoznato';
+      case StudyLevel.Undergraduate: return this.translationService.instant('common.study_level.undergraduate');
+      case StudyLevel.Graduate: return this.translationService.instant('common.study_level.graduate');
+      default: return this.translationService.instant('common.unknown');
     }
   }
 
@@ -440,10 +447,15 @@ export class SupervisorPendingReportsComponent implements OnInit {
     }
   }
 
+  getDaysWaitingText(confirmedAt: string): string {
+    const days = this.getDaysWaiting(confirmedAt);
+    return this.translationService.instant('common.days_waiting', { days });
+  }
+
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message,
       life: 5000
     });

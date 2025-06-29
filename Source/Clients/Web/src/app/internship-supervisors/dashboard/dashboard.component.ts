@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { 
   InternshipSupervisorService, 
@@ -15,6 +16,7 @@ import {
   InternshipStatus,
   StudyLevel
 } from '../services/internship-supervisor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-supervisor-dashboard',
@@ -25,14 +27,15 @@ import {
     ButtonModule,
     ChipModule,
     ProgressSpinnerModule,
-    ToastModule
+    ToastModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="dashboard-container">
       <header class="dashboard-header">
-        <h1>Supervisor Dashboard</h1>
-        <p>Dobro došli u sustav za upravljanje praksama</p>
+        <h1>{{ 'supervisor.dashboard.title' | translate }}</h1>
+        <p>{{ 'supervisor.dashboard.subtitle' | translate }}</p>
       </header>
 
       <div class="dashboard-content">
@@ -45,7 +48,7 @@ import {
               </div>
               <div class="stat-info">
                 <div class="stat-value">{{ totalInternships }}</div>
-                <div class="stat-label">Ukupno praksi</div>
+                <div class="stat-label">{{ 'supervisor.dashboard.total_internships' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -57,7 +60,7 @@ import {
               </div>
               <div class="stat-info">
                 <div class="stat-value">{{ pendingReportsCount }}</div>
-                <div class="stat-label">Čeka ocjenu</div>
+                <div class="stat-label">{{ 'supervisor.dashboard.pending_reports' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -69,7 +72,7 @@ import {
               </div>
               <div class="stat-info">
                 <div class="stat-value">{{ completedInternships }}</div>
-                <div class="stat-label">Završene prakse</div>
+                <div class="stat-label">{{ 'supervisor.dashboard.completed_internships' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -81,7 +84,7 @@ import {
               </div>
               <div class="stat-info">
                 <div class="stat-value">{{ totalProviders }}</div>
-                <div class="stat-label">Ponuditelji</div>
+                <div class="stat-label">{{ 'supervisor.dashboard.total_providers' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -90,10 +93,10 @@ import {
         <!-- Quick Actions -->
         <div class="actions-section">
           <p-card class="actions-card">
-            <h3>Brze akcije</h3>
+            <h3>{{ 'supervisor.dashboard.quick_actions' | translate }}</h3>
             <div class="actions-grid">
               <p-button 
-                label="Sve prakse" 
+                [label]="'supervisor.dashboard.all_internships' | translate" 
                 icon="pi pi-briefcase" 
                 severity="info"
                 [outlined]="true"
@@ -102,7 +105,7 @@ import {
               </p-button>
               
               <p-button 
-                label="Čekaju ocjenu" 
+                [label]="'supervisor.dashboard.pending_grading' | translate" 
                 icon="pi pi-clock" 
                 severity="warn"
                 [outlined]="true"
@@ -112,7 +115,7 @@ import {
               </p-button>
               
               <p-button 
-                label="Ponuditelji" 
+                [label]="'supervisor.dashboard.providers' | translate" 
                 icon="pi pi-building" 
                 severity="secondary"
                 [outlined]="true"
@@ -121,7 +124,7 @@ import {
               </p-button>
               
               <p-button 
-                label="Dokumenti" 
+                [label]="'supervisor.dashboard.documents' | translate" 
                 icon="pi pi-file" 
                 severity="help"
                 [outlined]="true"
@@ -136,14 +139,14 @@ import {
         @if (recentInternships.length > 0) {
           <div class="recent-section">
             <p-card class="recent-card">
-              <h3>Nedavne prakse</h3>
+              <h3>{{ 'supervisor.dashboard.recent_internships' | translate }}</h3>
               <div class="recent-list">
                 @for (internship of recentInternships; track internship.id) {
                   <div class="recent-item">
                     <div class="recent-info">
                       <div class="recent-student">
                         <strong>{{ getStudentName(internship) }}</strong>
-                        <small>{{ internship.internshipProvider?.name || 'Nepoznat ponuditelj' }}</small>
+                        <small>{{ internship.internshipProvider?.name || ('supervisor.dashboard.unknown_provider' | translate) }}</small>
                       </div>
                       <div class="recent-status">
                         <p-chip 
@@ -155,7 +158,7 @@ import {
                     </div>
                     @if (internship.status === InternshipStatus.Completed) {
                       <p-button 
-                        label="Izvještaj" 
+                        [label]="'supervisor.dashboard.report' | translate" 
                         icon="pi pi-file-text" 
                         size="small"
                         severity="info"
@@ -173,7 +176,7 @@ import {
         @if (loading) {
           <div class="loading-overlay">
             <p-progressSpinner></p-progressSpinner>
-            <p>Učitavanje podataka...</p>
+            <p>{{ 'supervisor.dashboard.loading_data' | translate }}</p>
           </div>
         }
       </div>
@@ -413,10 +416,14 @@ export class SupervisorDashboardComponent implements OnInit {
   constructor(
     private supervisorService: InternshipSupervisorService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    // Initialize translations
+    this.translationService.initializeLanguage();
+    
     this.loadDashboardData();
   }
 
@@ -521,7 +528,7 @@ export class SupervisorDashboardComponent implements OnInit {
 
   // Helper methods
   getStudentName(internship: InternshipInformation): string {
-    if (!internship.student) return 'Nepoznat student';
+    if (!internship.student) return this.translationService.instant('common.unknown_student');
     
     const student = internship.student;
     return student.fullName || `${student.firstName || ''} ${student.lastName || ''}`.trim() || student.emailAddress;
@@ -531,22 +538,22 @@ export class SupervisorDashboardComponent implements OnInit {
     // Handle string values from backend
     if (typeof status === 'string') {
       switch (status) {
-        case 'Pending': return 'Na čekanju';
-        case 'Accepted': return 'Prihvaćeno';
-        case 'Rejected': return 'Odbačeno';
-        case 'Completed': return 'Završeno';
-        default: return 'Nepoznato';
+        case 'Pending': return this.translationService.instant('status.pending');
+        case 'Accepted': return this.translationService.instant('status.accepted');
+        case 'Rejected': return this.translationService.instant('status.rejected');
+        case 'Completed': return this.translationService.instant('status.completed');
+        default: return this.translationService.instant('status.unknown');
       }
     }
     
     // Handle numeric enum values
     const numericStatus = Number(status);
     switch (numericStatus) {
-      case InternshipStatus.Pending: return 'Na čekanju';
-      case InternshipStatus.Accepted: return 'Prihvaćeno';
-      case InternshipStatus.Rejected: return 'Odbačeno';
-      case InternshipStatus.Completed: return 'Završeno';
-      default: return 'Nepoznato';
+      case InternshipStatus.Pending: return this.translationService.instant('status.pending');
+      case InternshipStatus.Accepted: return this.translationService.instant('status.accepted');
+      case InternshipStatus.Rejected: return this.translationService.instant('status.rejected');
+      case InternshipStatus.Completed: return this.translationService.instant('status.completed');
+      default: return this.translationService.instant('status.unknown');
     }
   }
 

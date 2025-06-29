@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { 
   MentorService, 
@@ -17,6 +18,7 @@ import {
   parseInternshipStatus,
   parseStudyLevel
 } from '../services/mentor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-internship-applications',
@@ -29,14 +31,15 @@ import {
     ToastModule,
     ConfirmDialogModule,
     CardModule,
-    TooltipModule
+    TooltipModule,
+    TranslateModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="card">
       <div class="card-header">
-        <h2>Zahtjevi za praksu</h2>
-        <p class="text-600">Upravljajte zahtjevima studenata za praksu u vašoj tvrtki</p>
+        <h2>{{ 'mentor.applications.title' | translate }}</h2>
+        <p class="text-600">{{ 'mentor.applications.subtitle' | translate }}</p>
       </div>
 
       <p-table 
@@ -45,19 +48,19 @@ import {
         [paginator]="true" 
         [rows]="10"
         [showCurrentPageReport]="true"
-        currentPageReportTemplate="Prikazuje {first} do {last} od {totalRecords} zahtjeva"
+        [currentPageReportTemplate]="'mentor.applications.showing_records' | translate"
         [rowsPerPageOptions]="[10, 25, 50]"
         responsiveLayout="scroll">
         
         <ng-template pTemplate="header">
           <tr>
-            <th>Student</th>
-            <th>Email</th>
-            <th>Razina studija</th>
-            <th>Datum početka</th>
-            <th>Datum prijave</th>
-            <th>Status</th>
-            <th>Akcije</th>
+            <th>{{ 'mentor.applications.student' | translate }}</th>
+            <th>{{ 'mentor.applications.email' | translate }}</th>
+            <th>{{ 'mentor.applications.study_level' | translate }}</th>
+            <th>{{ 'mentor.applications.start_date' | translate }}</th>
+            <th>{{ 'mentor.applications.application_date' | translate }}</th>
+            <th>{{ 'mentor.applications.status' | translate }}</th>
+            <th>{{ 'mentor.applications.actions' | translate }}</th>
           </tr>
         </ng-template>
         
@@ -67,7 +70,7 @@ import {
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-user text-primary"></i>
                 <span class="font-medium">
-                  {{ application.student?.fullName || 'Nepoznato' }}
+                  {{ application.student?.fullName || ('mentor.applications.unknown' | translate) }}
                 </span>
               </div>
             </td>
@@ -103,7 +106,7 @@ import {
                   severity="success" 
                   size="small"
                   [text]="true"
-                  pTooltip="Prihvati zahtjev"
+                  [pTooltip]="'mentor.applications.accept_tooltip' | translate"
                   (onClick)="confirmAccept(application)">
                 </p-button>
                 <p-button 
@@ -111,12 +114,12 @@ import {
                   severity="danger" 
                   size="small"
                   [text]="true"
-                  pTooltip="Odbaci zahtjev"
+                  [pTooltip]="'mentor.applications.reject_tooltip' | translate"
                   (onClick)="confirmReject(application)">
                 </p-button>
               </div>
               <span *ngIf="application.status !== InternshipStatus.Pending" class="text-500">
-                Obrađeno
+                {{ 'mentor.applications.processed' | translate }}
               </span>
             </td>
           </tr>
@@ -127,8 +130,8 @@ import {
             <td colspan="7" class="text-center p-4">
               <div class="text-500">
                 <i class="pi pi-inbox text-4xl mb-3 block"></i>
-                <p class="text-lg">Nema novih zahtjeva za praksu</p>
-                <p class="text-600">Kada studenti pošalju zahtjeve, prikazat će se ovdje.</p>
+                <p class="text-lg">{{ 'mentor.applications.no_applications' | translate }}</p>
+                <p class="text-600">{{ 'mentor.applications.applications_will_appear' | translate }}</p>
               </div>
             </td>
           </tr>
@@ -177,10 +180,12 @@ export class InternshipApplicationsComponent implements OnInit {
   constructor(
     private mentorService: MentorService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit() {
+    this.translationService.initializeLanguage();
     this.loadApplications();
   }
 
@@ -200,8 +205,8 @@ export class InternshipApplicationsComponent implements OnInit {
         console.error('Error loading applications:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: 'Greška pri dohvaćanju zahtjeva za praksu'
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('mentor.applications.loading_error')
         });
         this.loading = false;
       }
@@ -210,11 +215,13 @@ export class InternshipApplicationsComponent implements OnInit {
 
   confirmAccept(application: InternshipApplicationInfo) {
     this.confirmationService.confirm({
-      message: `Jeste li sigurni da želite prihvatiti zahtjev studenta ${application.student?.fullName}?`,
-      header: 'Potvrda prihvaćanja',
+      message: this.translationService.instant('mentor.applications.confirm_accept', { 
+        name: application.student?.fullName || this.translationService.instant('mentor.applications.unknown')
+      }),
+      header: this.translationService.instant('mentor.applications.confirm_accept_header'),
       icon: 'pi pi-check-circle',
-      acceptLabel: 'Da, prihvati',
-      rejectLabel: 'Odustani',
+      acceptLabel: this.translationService.instant('mentor.applications.yes_accept'),
+      rejectLabel: this.translationService.instant('mentor.applications.cancel'),
       acceptButtonStyleClass: 'p-button-success',
       accept: () => {
         this.acceptApplication(application);
@@ -224,11 +231,13 @@ export class InternshipApplicationsComponent implements OnInit {
 
   confirmReject(application: InternshipApplicationInfo) {
     this.confirmationService.confirm({
-      message: `Jeste li sigurni da želite odbaciti zahtjev studenta ${application.student?.fullName}?`,
-      header: 'Potvrda odbacivanja',
+      message: this.translationService.instant('mentor.applications.confirm_reject', { 
+        name: application.student?.fullName || this.translationService.instant('mentor.applications.unknown')
+      }),
+      header: this.translationService.instant('mentor.applications.confirm_reject_header'),
       icon: 'pi pi-times-circle',
-      acceptLabel: 'Da, odbaci',
-      rejectLabel: 'Odustani',
+      acceptLabel: this.translationService.instant('mentor.applications.yes_reject'),
+      rejectLabel: this.translationService.instant('mentor.applications.cancel'),
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.rejectApplication(application);
@@ -244,8 +253,10 @@ export class InternshipApplicationsComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: `Zahtjev studenta ${application.student?.fullName} je prihvaćen`
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('mentor.applications.application_accepted', {
+            name: application.student?.fullName || this.translationService.instant('mentor.applications.unknown')
+          })
         });
         this.loadApplications(); // Refresh the list
       },
@@ -253,8 +264,8 @@ export class InternshipApplicationsComponent implements OnInit {
         console.error('Error accepting application:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: 'Greška pri prihvaćanju zahtjeva'
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('mentor.applications.accept_error')
         });
       }
     });
@@ -268,8 +279,10 @@ export class InternshipApplicationsComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: `Zahtjev studenta ${application.student?.fullName} je odbačen`
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('mentor.applications.application_rejected', {
+            name: application.student?.fullName || this.translationService.instant('mentor.applications.unknown')
+          })
         });
         this.loadApplications(); // Refresh the list
       },
@@ -277,8 +290,8 @@ export class InternshipApplicationsComponent implements OnInit {
         console.error('Error rejecting application:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Greška',
-          detail: 'Greška pri odbacivanju zahtjeva'
+          summary: this.translationService.instant('common.error'),
+          detail: this.translationService.instant('mentor.applications.reject_error')
         });
       }
     });
@@ -286,12 +299,12 @@ export class InternshipApplicationsComponent implements OnInit {
 
   getStatusLabel(status: InternshipStatus): string {
     const statusMap = {
-      [InternshipStatus.Pending]: 'Na čekanju',
-      [InternshipStatus.Accepted]: 'Prihvaćeno',
-      [InternshipStatus.Rejected]: 'Odbačeno',
-      [InternshipStatus.Completed]: 'Završeno'
+      [InternshipStatus.Pending]: this.translationService.instant('common.status.pending'),
+      [InternshipStatus.Accepted]: this.translationService.instant('common.status.accepted'),
+      [InternshipStatus.Rejected]: this.translationService.instant('common.status.rejected'),
+      [InternshipStatus.Completed]: this.translationService.instant('common.status.completed')
     };
-    return statusMap[status] || 'Nepoznato';
+    return statusMap[status] || this.translationService.instant('common.unknown');
   }
 
   getStatusSeverity(status: InternshipStatus): 'success' | 'info' | 'warn' | 'danger' {
@@ -306,10 +319,10 @@ export class InternshipApplicationsComponent implements OnInit {
 
   getStudyLevelLabel(studyLevel: StudyLevel): string {
     const studyLevelMap = {
-      [StudyLevel.Undergraduate]: 'Preddiplomski',
-      [StudyLevel.Graduate]: 'Diplomski'
+      [StudyLevel.Undergraduate]: this.translationService.instant('common.study_level.undergraduate'),
+      [StudyLevel.Graduate]: this.translationService.instant('common.study_level.graduate')
     };
-    return studyLevelMap[studyLevel] || 'Nepoznato';
+    return studyLevelMap[studyLevel] || this.translationService.instant('common.unknown');
   }
 
   getStudyLevelSeverity(studyLevel: StudyLevel): 'success' | 'info' | 'warn' | 'danger' {

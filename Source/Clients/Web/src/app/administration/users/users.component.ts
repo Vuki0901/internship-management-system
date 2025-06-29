@@ -12,9 +12,12 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { StepperModule } from 'primeng/stepper';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
+import { TranslateModule } from '@ngx-translate/core';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { UserService, UserDto, UserRoleDto, CreateUserRequest, UpdateUserRequest, InternshipProvider, SetAdministratorRoleRequest, SetInternshipSupervisorRoleRequest, SetMentorRoleRequest } from '../services/user.service';
 import { TagModule } from 'primeng/tag';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -34,14 +37,16 @@ import { TagModule } from 'primeng/tag';
     CardModule,
     BadgeModule,
     TagModule,
+    TranslateModule,
+    TooltipModule,
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="page-container">
       <header class="page-header">
-        <h1>Upravljanje korisnicima</h1>
+        <h1>{{ 'admin.users.title' | translate }}</h1>
         <p-button 
-          label="Dodaj korisnika"
+          [label]="'admin.users.add_user' | translate"
           icon="pi pi-plus"
           [style]="{'background-color': 'var(--primary-color)', 'border-color': 'var(--primary-color)'}"
           (onClick)="openUserDialog()">
@@ -54,7 +59,7 @@ import { TagModule } from 'primeng/tag';
             <i class="pi pi-search search-icon"></i>
             <input 
               type="text" 
-              placeholder="Pretraži korisnike"
+              [placeholder]="'admin.users.search_users' | translate"
               class="search-input"
               [(ngModel)]="searchText"
               (ngModelChange)="filterUsers()">
@@ -69,12 +74,12 @@ import { TagModule } from 'primeng/tag';
 
           <ng-template pTemplate="header">
             <tr>
-              <th>Ime i prezime</th>
-              <th>Email adresa</th>
-              <th>OIB</th>
-              <th>Uloge</th>
-              <th>Datum kreiranja</th>
-              <th style="width: 12rem">Akcije</th>
+              <th>{{ 'admin.users.full_name' | translate }}</th>
+              <th>{{ 'admin.users.email_address' | translate }}</th>
+              <th>{{ 'admin.users.oib' | translate }}</th>
+              <th>{{ 'admin.users.roles' | translate }}</th>
+              <th>{{ 'admin.users.created_date' | translate }}</th>
+              <th style="width: 12rem">{{ 'admin.users.actions' | translate }}</th>
             </tr>
           </ng-template>
 
@@ -100,7 +105,7 @@ import { TagModule } from 'primeng/tag';
                       class="text-xs"
                     ></p-tag>
                   </ng-container>
-                  <span *ngIf="!user.roles || user.roles.length === 0" class="text-500 text-sm">Nema uloga</span>
+                  <span *ngIf="!user.roles || user.roles.length === 0" class="text-500 text-sm">{{ 'admin.users.no_roles' | translate }}</span>
                 </div>
               </td>
               <td>{{ formatDate(user.createdOn) }}</td>
@@ -113,7 +118,7 @@ import { TagModule } from 'primeng/tag';
                     size="small"
                     class="action-btn edit-btn"
                     (onClick)="editUser(user)"
-                    pTooltip="Uredi">
+                    [pTooltip]="'admin.users.edit_tooltip' | translate">
                   </p-button>
                   <p-button 
                     icon="pi pi-users"
@@ -122,7 +127,7 @@ import { TagModule } from 'primeng/tag';
                     size="small"
                     class="action-btn roles-btn"
                     (onClick)="manageUserRoles(user)"
-                    pTooltip="Upravljaj ulogama">
+                    [pTooltip]="'admin.users.manage_roles_tooltip' | translate">
                   </p-button>
                 </div>
               </td>
@@ -132,7 +137,7 @@ import { TagModule } from 'primeng/tag';
           <ng-template pTemplate="emptymessage">
             <tr>
               <td colspan="6" class="text-center">
-                Nema korisnika za prikaz.
+                {{ 'admin.users.no_users' | translate }}
               </td>
             </tr>
           </ng-template>
@@ -141,7 +146,7 @@ import { TagModule } from 'primeng/tag';
 
       <!-- User Dialog -->
       <p-dialog 
-        [header]="editingUser ? 'Uredi korisnika' : 'Dodaj novog korisnika'"
+        [header]="editingUser ? ('admin.users.edit_user' | translate) : ('admin.users.add_new_user' | translate)"
         [(visible)]="showUserDialog" 
         [modal]="true"
         [style]="{width: '600px'}"
@@ -153,7 +158,7 @@ import { TagModule } from 'primeng/tag';
           <form (ngSubmit)="saveUser()" class="user-form">
             <div class="form-row">
               <div class="form-group">
-                <label for="firstName">Ime *</label>
+                <label for="firstName">{{ 'admin.users.first_name' | translate }} *</label>
                 <input 
                   id="firstName"
                   type="text"
@@ -165,7 +170,7 @@ import { TagModule } from 'primeng/tag';
               </div>
               
               <div class="form-group">
-                <label for="lastName">Prezime *</label>
+                <label for="lastName">{{ 'admin.users.last_name' | translate }} *</label>
                 <input 
                   id="lastName"
                   type="text"
@@ -178,7 +183,7 @@ import { TagModule } from 'primeng/tag';
             </div>
 
             <div class="form-group">
-              <label for="emailAddress">Email adresa *</label>
+              <label for="emailAddress">{{ 'admin.users.email_required' | translate }}</label>
               <input 
                 id="emailAddress"
                 type="email"
@@ -190,7 +195,7 @@ import { TagModule } from 'primeng/tag';
             </div>
 
             <div class="form-group">
-              <label for="password">{{ editingUser ? 'Nova lozinka (ostaviti prazno ako se ne mijenja)' : 'Lozinka *' }}</label>
+              <label for="password">{{ editingUser ? ('admin.users.new_password_optional' | translate) : ('admin.users.password_required' | translate) }}</label>
               <input 
                 id="password"
                 type="password"
@@ -202,7 +207,7 @@ import { TagModule } from 'primeng/tag';
             </div>
 
             <div class="form-group">
-              <label for="personalIdentificationNumber">OIB</label>
+              <label for="personalIdentificationNumber">{{ 'admin.users.oib_label' | translate }}</label>
               <input 
                 id="personalIdentificationNumber"
                 type="text"
@@ -214,14 +219,14 @@ import { TagModule } from 'primeng/tag';
 
             <div class="dialog-actions">
               <p-button 
-                label="Odustani"
+                [label]="'common.cancel' | translate"
                 type="button"
                 severity="secondary"
                 [outlined]="true"
                 (onClick)="closeUserDialog()">
               </p-button>
               <p-button 
-                label="Spremi"
+                [label]="'common.save' | translate"
                 type="submit"
                 [style]="{'background-color': 'var(--primary-color)', 'border-color': 'var(--primary-color)'}">
               </p-button>
@@ -232,7 +237,7 @@ import { TagModule } from 'primeng/tag';
 
       <!-- Role Management Dialog -->
       <p-dialog 
-        header="Upravljanje ulogama korisnika"
+        [header]="'admin.users.manage_user_roles' | translate"
         [(visible)]="showRoleDialog" 
         [modal]="true"
         [style]="{width: '800px'}"
@@ -261,15 +266,15 @@ import { TagModule } from 'primeng/tag';
                   <i class="pi pi-shield"></i>
                 </div>
                 <div class="role-details">
-                  <h4>Administrator</h4>
-                  <p>Potpun pristup administraciji sustava</p>
+                  <h4>{{ 'roles.administrator' | translate }}</h4>
+                  <p>{{ 'roles.administrator_description' | translate }}</p>
                   <div class="role-status" *ngIf="hasRole(selectedUserForRoles, 'Administrator')">
-                    <p-badge value="Dodijeljena uloga" severity="success"></p-badge>
+                    <p-badge [value]="'common.assigned' | translate" severity="success"></p-badge>
                   </div>
                 </div>
                 <div class="role-actions">
                   <p-button 
-                    [label]="hasRole(selectedUserForRoles, 'Administrator') ? 'Već dodijeljena' : 'Dodijeli ulogu'"
+                    [label]="hasRole(selectedUserForRoles, 'Administrator') ? ('common.already_assigned' | translate) : ('admin.users.assign_administrator' | translate)"
                     size="small"
                     [style]="{'background-color': '#dc3545', 'border-color': '#dc3545'}"
                     (onClick)="assignAdministratorRole()"
@@ -287,18 +292,18 @@ import { TagModule } from 'primeng/tag';
                   <i class="pi pi-graduation-cap"></i>
                 </div>
                 <div class="role-details">
-                  <h4>Voditelj prakse</h4>
-                  <p>Nadzor i upravljanje praksama studenata</p>
+                  <h4>{{ 'roles.supervisor' | translate }}</h4>
+                  <p>{{ 'roles.supervisor_description' | translate }}</p>
                   <div class="role-status" *ngIf="hasRole(selectedUserForRoles, 'InternshipSupervisor')">
-                    <p-badge value="Dodijeljena uloga" severity="success"></p-badge>
+                    <p-badge [value]="'common.assigned' | translate" severity="success"></p-badge>
                     <small class="role-detail">
-                      Akademski stupanj: {{ getRole(selectedUserForRoles, 'InternshipSupervisor')?.academicDegreeAbbreviation }}
+                      {{ 'admin.users.academic_degree' | translate }}: {{ getRole(selectedUserForRoles, 'InternshipSupervisor')?.academicDegreeAbbreviation }}
                     </small>
                   </div>
                 </div>
                 <div class="role-actions">
                   <p-button 
-                    [label]="hasRole(selectedUserForRoles, 'InternshipSupervisor') ? 'Već dodijeljena' : 'Dodijeli ulogu'"
+                    [label]="hasRole(selectedUserForRoles, 'InternshipSupervisor') ? ('common.already_assigned' | translate) : ('admin.users.assign_supervisor' | translate)"
                     size="small"
                     [style]="{'background-color': '#fd7e14', 'border-color': '#fd7e14'}"
                     (onClick)="showSupervisorRoleForm = !showSupervisorRoleForm"
@@ -310,25 +315,25 @@ import { TagModule } from 'primeng/tag';
               <!-- Supervisor Role Form -->
               <div class="role-form" *ngIf="showSupervisorRoleForm">
                 <div class="form-group">
-                  <label for="academicDegree">Akademski stupanj (kratica) *</label>
+                  <label for="academicDegree">{{ 'admin.users.academic_degree_abbreviation' | translate }} *</label>
                   <input 
                     id="academicDegree"
                     type="text"
                     pInputText
                     [(ngModel)]="supervisorRoleForm.academicDegreeAbbreviation"
-                    placeholder="npr. dr. sc., mag. ing."
+                    [placeholder]="'admin.users.academic_degree_placeholder' | translate"
                     class="w-full">
                 </div>
                 <div class="form-actions">
                   <p-button 
-                    label="Odustani"
+                    [label]="'common.cancel' | translate"
                     severity="secondary"
                     [outlined]="true"
                     size="small"
                     (onClick)="cancelSupervisorRoleForm()">
                   </p-button>
                   <p-button 
-                    label="Spremi"
+                    [label]="'common.save' | translate"
                     size="small"
                     [style]="{'background-color': '#fd7e14', 'border-color': '#fd7e14'}"
                     (onClick)="assignSupervisorRole()"
@@ -346,18 +351,18 @@ import { TagModule } from 'primeng/tag';
                   <i class="pi pi-users"></i>
                 </div>
                 <div class="role-details">
-                  <h4>Mentor</h4>
-                  <p>Mentorstvo studenata tijekom prakse</p>
+                  <h4>{{ 'roles.mentor' | translate }}</h4>
+                  <p>{{ 'roles.mentor_description' | translate }}</p>
                   <div class="role-status" *ngIf="hasRole(selectedUserForRoles, 'Mentor')">
-                    <p-badge value="Dodijeljena uloga" severity="success"></p-badge>
+                    <p-badge [value]="'common.assigned' | translate" severity="success"></p-badge>
                     <small class="role-detail">
-                      Ponuditelj: {{ getRole(selectedUserForRoles, 'Mentor')?.internshipProviderName }}
+                      {{ 'admin.users.internship_provider' | translate }}: {{ getRole(selectedUserForRoles, 'Mentor')?.internshipProviderName }}
                     </small>
                   </div>
                 </div>
                 <div class="role-actions">
                   <p-button 
-                    [label]="hasRole(selectedUserForRoles, 'Mentor') ? 'Već dodijeljena' : 'Dodijeli ulogu'"
+                    [label]="hasRole(selectedUserForRoles, 'Mentor') ? ('common.already_assigned' | translate) : ('admin.users.assign_mentor' | translate)"
                     size="small"
                     [style]="{'background-color': '#198754', 'border-color': '#198754'}"
                     (onClick)="showMentorRoleForm = !showMentorRoleForm; loadInternshipProviders()"
@@ -369,27 +374,27 @@ import { TagModule } from 'primeng/tag';
               <!-- Mentor Role Form -->
               <div class="role-form" *ngIf="showMentorRoleForm">
                 <div class="form-group">
-                  <label for="internshipProvider">Ponuditelj prakse *</label>
+                  <label for="internshipProvider">{{ 'admin.users.internship_provider' | translate }} *</label>
                   <p-select 
                     [options]="internshipProviders" 
                     [(ngModel)]="mentorRoleForm.internshipProviderId"
                     optionLabel="name" 
                     optionValue="id"
-                    placeholder="Odaberite ponuditelja prakse"
+                    [placeholder]="'admin.users.select_provider' | translate"
                     class="w-full"
                     [loading]="loadingProviders">
                   </p-select>
                 </div>
                 <div class="form-actions">
                   <p-button 
-                    label="Odustani"
+                    [label]="'common.cancel' | translate"
                     severity="secondary"
                     [outlined]="true"
                     size="small"
                     (onClick)="cancelMentorRoleForm()">
                   </p-button>
                   <p-button 
-                    label="Spremi"
+                    [label]="'common.save' | translate"
                     size="small"
                     [style]="{'background-color': '#198754', 'border-color': '#198754'}"
                     (onClick)="assignMentorRole()"
@@ -403,7 +408,7 @@ import { TagModule } from 'primeng/tag';
 
           <div class="role-dialog-footer">
             <p-button 
-              label="Zatvori"
+              [label]="'common.close' | translate"
               severity="secondary"
               [outlined]="true"
               (onClick)="closeRoleDialog()">
@@ -840,10 +845,12 @@ export class UsersComponent implements OnInit {
   constructor(
     private userService: UserService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadUsers();
   }
 
@@ -917,8 +924,8 @@ export class UsersComponent implements OnInit {
     if (!this.editingUser && !this.userForm.password) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Upozorenje',
-        detail: 'Lozinka je obavezna za nove korisnike.'
+        summary: this.translationService.instant('common.warning'),
+        detail: this.translationService.instant('admin.users.password_required_new_users')
       });
       return;
     }
@@ -938,8 +945,8 @@ export class UsersComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Korisnik je uspješno ažuriran.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('admin.users.user_updated')
           });
           this.loadUsers();
           this.closeUserDialog();
@@ -959,8 +966,8 @@ export class UsersComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Uspjeh',
-            detail: 'Novi korisnik je uspješno kreiran.'
+            summary: this.translationService.instant('common.success'),
+            detail: this.translationService.instant('admin.users.user_created')
           });
           this.loadUsers();
           this.closeUserDialog();
@@ -1025,8 +1032,8 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Administratorska uloga je uspješno dodijeljena.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('admin.users.admin_role_assigned')
         });
         this.assigningRole = null;
         this.closeRoleDialog();
@@ -1056,8 +1063,8 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Uloga voditelja prakse je uspješno dodijeljena.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('admin.users.supervisor_role_assigned')
         });
         this.assigningRole = null;
         this.closeRoleDialog();
@@ -1102,8 +1109,8 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Uspjeh',
-          detail: 'Mentorska uloga je uspješno dodijeljena.'
+          summary: this.translationService.instant('common.success'),
+          detail: this.translationService.instant('admin.users.mentor_role_assigned')
         });
         this.assigningRole = null;
         this.closeRoleDialog();

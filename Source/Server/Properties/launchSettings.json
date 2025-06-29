@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Tunnel-HTTPS": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:5000",
+      "hotReloadEnabled": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "ASPNETCORE_URLS": "https://localhost:5000"
+      }
+    }
+  }
+} 

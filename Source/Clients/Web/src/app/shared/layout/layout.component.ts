@@ -3,30 +3,53 @@ import { RouterOutlet, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { AuthService } from '../auth/auth.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageSwitcherComponent } from '../components/language-switcher/language-switcher.component';
+import { TranslationService } from '../services/translation.service';
 
 interface MenuItem {
   label: string;
   icon: string;
   route: string;
-  hasNotification?: boolean;
 }
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ToastModule, RouterModule],
+  imports: [CommonModule, RouterOutlet, ToastModule, RouterModule, TranslateModule, LanguageSwitcherComponent],
   template: `
     <div class="layout-container">
       <p-toast></p-toast>
-      <aside class="sidebar">
+      
+      <!-- Mobile Topbar -->
+      <header class="mobile-topbar">
+        <button class="hamburger-btn" (click)="toggleSidebar()" [attr.aria-label]="'Toggle navigation menu'">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h2 class="mobile-app-title">{{ 'app.title' | translate }}</h2>
+        <button class="mobile-logout-btn" (click)="logout()" title="Logout">
+          <i class="fa-solid fa-sign-out-alt"></i>
+        </button>
+      </header>
+
+      <!-- Sidebar Overlay for Mobile -->
+      <div class="sidebar-overlay" 
+           [class.show]="isSidebarOpen" 
+           (click)="closeSidebar()"></div>
+      
+      <!-- Sidebar -->
+      <aside class="sidebar" [class.open]="isSidebarOpen">
         <div class="sidebar-header">
-          <h2 class="app-title">FIDIT praksa</h2>
+          <h2 class="app-title">{{ 'app.title' | translate }}</h2>
+          <button class="sidebar-close-btn" (click)="closeSidebar()">
+            <i class="fa-solid fa-times"></i>
+          </button>
         </div>
         
         <div class="search-section">
           <div class="search-box">
             <i class="fa-solid fa-search search-icon"></i>
-            <input type="text" placeholder="Pretraživanje" class="search-input">
+            <input type="text" [placeholder]="'common.search' | translate" class="search-input">
           </div>
         </div>
 
@@ -35,12 +58,16 @@ interface MenuItem {
              [routerLink]="item.route" 
              routerLinkActive="active" 
              [routerLinkActiveOptions]="{exact: item.route.endsWith('/dashboard')}"
-             class="nav-item">
+             class="nav-item"
+             (click)="onNavItemClick()">
             <i [class]="item.icon + ' nav-icon'"></i>
-            <span>{{ item.label }}</span>
-            <span class="notification-dot" *ngIf="item.hasNotification"></span>
+            <span>{{ item.label | translate }}</span>
           </a>
         </nav>
+
+        <div class="language-section">
+          <app-language-switcher></app-language-switcher>
+        </div>
 
         <div class="user-section">
           <div class="user-avatar">
@@ -50,7 +77,7 @@ interface MenuItem {
             <div class="user-name">{{ userFullName }}</div>
             <div class="user-role">{{ userRole }}</div>
           </div>
-          <button (click)="logout()" class="logout-btn" title="Logout">
+          <button (click)="logout()" class="logout-btn" [title]="'common.logout' | translate">
             <i class="fa-solid fa-sign-out-alt"></i>
           </button>
         </div>
@@ -66,6 +93,81 @@ interface MenuItem {
       display: flex;
       height: 100vh;
       font-family: 'Roboto', sans-serif;
+      position: relative;
+    }
+
+    /* Mobile Topbar */
+    .mobile-topbar {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      align-items: center;
+      padding: 0 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .hamburger-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-app-title {
+      flex: 1;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0;
+      color: white;
+    }
+
+    .mobile-logout-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .mobile-logout-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .sidebar-overlay.show {
+      opacity: 1;
+      visibility: visible;
     }
 
     .sidebar {
@@ -75,11 +177,15 @@ interface MenuItem {
       display: flex;
       flex-direction: column;
       box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
     }
 
     .sidebar-header {
       padding: 1.5rem 1.5rem 1rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .app-title {
@@ -88,6 +194,22 @@ interface MenuItem {
       margin: 0;
       color: white;
       letter-spacing: 0.5px;
+    }
+
+    .sidebar-close-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .sidebar-close-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
 
     .search-section {
@@ -162,12 +284,13 @@ interface MenuItem {
       font-size: 1rem;
     }
 
-    .notification-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #e74c3c;
-      border-radius: 50%;
-      margin-left: auto;
+
+
+    .language-section {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
     }
 
     .user-section {
@@ -236,14 +359,67 @@ interface MenuItem {
       position: relative;
     }
 
-    /* Responsive adjustments */
+    /* Mobile Responsive Styles */
     @media (max-width: 768px) {
+      .mobile-topbar {
+        display: flex;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
+        width: 280px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-close-btn {
+        display: block;
+      }
+
+      .main-content {
+        margin-top: 60px;
+        width: 100%;
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+      }
+
+      .layout-container {
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+    }
+
+    /* Tablet adjustments */
+    @media (min-width: 769px) and (max-width: 1024px) {
       .sidebar {
         width: 250px;
       }
       
       .user-name {
         font-size: 0.85rem;
+      }
+    }
+
+    /* Ensure mobile topbar doesn't show on desktop */
+    @media (min-width: 769px) {
+      .mobile-topbar {
+        display: none !important;
+      }
+      
+      .sidebar-overlay {
+        display: none !important;
+      }
+      
+      .sidebar-close-btn {
+        display: none !important;
       }
     }
   `]
@@ -253,16 +429,36 @@ export class LayoutComponent implements OnInit {
   userInitials: string = '';
   userRole: string = '';
   menuItems: MenuItem[] = [];
+  isSidebarOpen: boolean = false;
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    // Initialize translations first
+    this.translationService.initializeLanguage();
+    
     this.userFullName = this.authService.getUserFullName() || 'Unknown User';
     this.userInitials = this.authService.getUserInitials();
     this.setupRoleBasedMenu();
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen = false;
+  }
+
+  onNavItemClick(): void {
+    // Close sidebar on mobile when a nav item is clicked
+    if (window.innerWidth <= 768) {
+      this.closeSidebar();
+    }
   }
 
   private setupRoleBasedMenu(): void {
@@ -316,23 +512,22 @@ export class LayoutComponent implements OnInit {
     this.userRole = 'Administrator';
     this.menuItems = [
       {
-        label: 'Početna',
+        label: 'navigation.dashboard',
         icon: 'fa-solid fa-home',
-        route: '/admin/dashboard',
-        hasNotification: true
+        route: '/admin/dashboard'
       },
       {
-        label: 'Korisnici',
+        label: 'navigation.users',
         icon: 'fa-solid fa-users',
         route: '/admin/users'
       },
       {
-        label: 'Ponuditelji prakse',
+        label: 'navigation.internship_providers',
         icon: 'fa-solid fa-building',
         route: '/admin/internship-providers'
       },
       {
-        label: 'Dokumenti',
+        label: 'navigation.documents',
         icon: 'fa-solid fa-file-text',
         route: '/admin/documents'
       }
@@ -343,26 +538,24 @@ export class LayoutComponent implements OnInit {
     this.userRole = 'Student';
     this.menuItems = [
       {
-        label: 'Početna',
+        label: 'navigation.dashboard',
         icon: 'fa-solid fa-home',
-        route: '/student/dashboard',
-        hasNotification: true
+        route: '/student/dashboard'
       },
       {
-        label: 'Dostupna praksa',
+        label: 'navigation.available_internships',
         icon: 'fa-solid fa-briefcase',
         route: '/student/internships'
       },
       {
-        label: 'Dokumenti',
+        label: 'navigation.documents',
         icon: 'fa-solid fa-file-text',
         route: '/student/documents'
       },
       {
-        label: 'Moja praksa',
+        label: 'navigation.my_internship',
         icon: 'fa-solid fa-user-tie',
-        route: '/student/internship',
-        hasNotification: true
+        route: '/student/internship'
       }
     ];
   }
@@ -371,23 +564,22 @@ export class LayoutComponent implements OnInit {
     this.userRole = 'Mentor';
     this.menuItems = [
       {
-        label: 'Početna',
+        label: 'navigation.dashboard',
         icon: 'fa-solid fa-home',
         route: '/mentor/dashboard'
       },
       {
-        label: 'Zahtjevi za praksu',
+        label: 'navigation.internship_applications',
         icon: 'fa-solid fa-clipboard-list',
-        route: '/mentor/applications',
-        hasNotification: true
+        route: '/mentor/applications'
       },
       {
-        label: 'Studenti',
+        label: 'navigation.students',
         icon: 'fa-solid fa-user-graduate',
         route: '/mentor/students'
       },
       {
-        label: 'Dokumenti',
+        label: 'navigation.documents',
         icon: 'fa-solid fa-file-text',
         route: '/mentor/documents'
       }
@@ -398,28 +590,27 @@ export class LayoutComponent implements OnInit {
     this.userRole = 'Supervisor';
     this.menuItems = [
       {
-        label: 'Početna',
+        label: 'navigation.dashboard',
         icon: 'fa-solid fa-home',
         route: '/supervisor/dashboard'
       },
       {
-        label: 'Sve prakse',
+        label: 'navigation.all_internships',
         icon: 'fa-solid fa-briefcase',
         route: '/supervisor/internships'
       },
       {
-        label: 'Čekaju ocjenu',
+        label: 'navigation.pending_reports',
         icon: 'fa-solid fa-clock',
-        route: '/supervisor/pending-reports',
-        hasNotification: true
+        route: '/supervisor/pending-reports'
       },
       {
-        label: 'Ponuditelji prakse',
+        label: 'navigation.providers',
         icon: 'fa-solid fa-building',
         route: '/supervisor/providers'
       },
       {
-        label: 'Dokumenti',
+        label: 'navigation.documents',
         icon: 'fa-solid fa-file-text',
         route: '/supervisor/documents'
       }

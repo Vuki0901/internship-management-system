@@ -8,7 +8,9 @@ import { ChipModule } from 'primeng/chip';
 import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
 import { 
   MentorService, 
   AssignedInternshipInfo, 
@@ -18,6 +20,7 @@ import {
   parseInternshipStatus,
   parseStudyLevel
 } from '../services/mentor.service';
+import { TranslationService } from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-mentor-dashboard',
@@ -30,14 +33,16 @@ import {
     ChipModule,
     DividerModule,
     ToastModule,
-    SkeletonModule
+    SkeletonModule,
+    TooltipModule,
+    TranslateModule
   ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <div class="page-header">
         <h1>{{ companyName }}</h1>
-        <p>Dobrodošli u vaš mentor portal - upravljajte studentima i praksama</p>
+        <p>{{ 'dashboard.welcome_message' | translate }}</p>
       </div>
 
       <!-- Loading State -->
@@ -59,8 +64,8 @@ import {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ totalStudents }}</div>
-                <div class="stat-label">Ukupno studenata</div>
-                <div class="stat-sublabel">Svi dodijeljeni studenti</div>
+                <div class="stat-label">{{ 'dashboard.total_students' | translate }}</div>
+                <div class="stat-sublabel">{{ 'dashboard.all_assigned_students' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -72,8 +77,8 @@ import {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ activeInternships }}</div>
-                <div class="stat-label">Aktivne prakse</div>
-                <div class="stat-sublabel">Prihvaćene i završene</div>
+                <div class="stat-label">{{ 'dashboard.active_internships' | translate }}</div>
+                <div class="stat-sublabel">{{ 'dashboard.accepted_and_completed' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -85,8 +90,8 @@ import {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ pendingApplications }}</div>
-                <div class="stat-label">Čekaju odobrenje</div>
-                <div class="stat-sublabel">Novi zahtjevi za praksu</div>
+                <div class="stat-label">{{ 'dashboard.pending_approval' | translate }}</div>
+                <div class="stat-sublabel">{{ 'dashboard.new_internship_requests' | translate }}</div>
               </div>
             </div>
           </p-card>
@@ -98,18 +103,18 @@ import {
               </div>
               <div class="stat-content">
                 <div class="stat-value">{{ reportsToReview }}</div>
-                <div class="stat-label">Izvještaji za pregled</div>
-                <div class="stat-sublabel">Završene prakse</div>
+                <div class="stat-label">{{ 'dashboard.reports_to_review' | translate }}</div>
+                <div class="stat-sublabel">{{ 'dashboard.completed_internships' | translate }}</div>
               </div>
             </div>
           </p-card>
         </div>
 
         <!-- Quick Actions -->
-        <p-card header="Brze akcije" [style]="{'margin-bottom': '1.5rem'}">
+        <p-card [header]="'dashboard.quick_actions' | translate" [style]="{'margin-bottom': '1.5rem'}">
           <div class="quick-actions">
             <p-button 
-              label="Pregled zahtjeva"
+              [label]="'dashboard.review_requests' | translate"
               icon="pi pi-inbox"
               severity="primary"
               [outlined]="true"
@@ -117,7 +122,7 @@ import {
               [style]="{'margin-right': '1rem', 'margin-bottom': '0.5rem'}">
             </p-button>
             <p-button 
-              label="Moji studenti"
+              [label]="'dashboard.my_students' | translate"
               icon="pi pi-users"
               severity="secondary"
               [outlined]="true"
@@ -125,7 +130,7 @@ import {
               [style]="{'margin-right': '1rem', 'margin-bottom': '0.5rem'}">
             </p-button>
             <p-button 
-              label="Dokumenti"
+              [label]="'dashboard.documents' | translate"
               icon="pi pi-file"
               severity="info"
               [outlined]="true"
@@ -137,7 +142,7 @@ import {
 
         <!-- Recent Applications -->
         @if (recentApplications.length > 0) {
-          <p-card header="Najnoviji zahtjevi za praksu" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'dashboard.recent_applications' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="applications-list">
               @for (application of recentApplications; track application.id) {
                 <div class="application-item">
@@ -157,7 +162,7 @@ import {
                   </div>
                   <div class="application-actions">
                     <p-button 
-                      label="Pregled"
+                      [label]="'dashboard.view' | translate"
                       icon="pi pi-eye"
                       size="small"
                       severity="secondary"
@@ -171,7 +176,7 @@ import {
             <p-divider></p-divider>
             <div class="view-all-section">
               <p-button 
-                label="Prikaži sve zahtjeve"
+                [label]="'dashboard.show_all_requests' | translate"
                 icon="pi pi-arrow-right"
                 severity="primary"
                 [text]="true"
@@ -183,7 +188,7 @@ import {
 
         <!-- Current Students -->
         @if (currentStudents.length > 0) {
-          <p-card header="Trenutni studenti" [style]="{'margin-bottom': '1.5rem'}">
+          <p-card [header]="'dashboard.current_students' | translate" [style]="{'margin-bottom': '1.5rem'}">
             <div class="students-grid">
               @for (student of currentStudents; track student.id) {
                 <div class="student-card">
@@ -198,14 +203,14 @@ import {
                   </div>
                   <div class="student-details">
                     <div class="detail-row">
-                      <span class="detail-label">Status:</span>
+                      <span class="detail-label">{{ 'dashboard.status' | translate }}:</span>
                       <p-chip 
                         [label]="getStatusText(student.status)"
                         [style]="getStatusStyle(student.status)">
                       </p-chip>
                     </div>
                     <div class="detail-row">
-                      <span class="detail-label">Razina:</span>
+                      <span class="detail-label">{{ 'dashboard.level' | translate }}:</span>
                       <p-chip 
                         [label]="getStudyLevelText(student.studyLevel)"
                         [style]="getStudyLevelStyle(student.studyLevel)">
@@ -213,7 +218,7 @@ import {
                     </div>
                     @if (student.startDate) {
                       <div class="detail-row">
-                        <span class="detail-label">Početak:</span>
+                        <span class="detail-label">{{ 'dashboard.start_date' | translate }}:</span>
                         <span>{{ formatDate(student.startDate) }}</span>
                       </div>
                     }
@@ -224,7 +229,7 @@ import {
                       size="small"
                       severity="info"
                       [text]="true"
-                      pTooltip="Prikaži detalje"
+                      [pTooltip]="'dashboard.show_details' | translate"
                       (onClick)="viewStudentDetails(student)">
                     </p-button>
                     @if (student.status === 4) {
@@ -233,7 +238,7 @@ import {
                         size="small"
                         severity="warn"
                         [text]="true"
-                        pTooltip="Pregled izvještaja"
+                        [pTooltip]="'dashboard.review_report' | translate"
                         (onClick)="viewReport(student)">
                       </p-button>
                     }
@@ -244,7 +249,7 @@ import {
             <p-divider></p-divider>
             <div class="view-all-section">
               <p-button 
-                label="Prikaži sve studente"
+                [label]="'dashboard.show_all_students' | translate"
                 icon="pi pi-arrow-right"
                 severity="primary"
                 [text]="true"
@@ -259,11 +264,11 @@ import {
           <p-card>
             <div class="empty-state">
               <i class="pi pi-users empty-icon"></i>
-              <h3>Dobrodošli u mentor portal!</h3>
-              <p>Trenutno nemate dodijeljene studente ili zahtjeve za praksu.</p>
-              <p>Kada studenti pošalju zahtjeve za praksu u vašoj tvrtki, pojavit će se ovdje.</p>
+              <h3>{{ 'dashboard.welcome_portal' | translate }}</h3>
+              <p>{{ 'dashboard.no_students_assigned' | translate }}</p>
+              <p>{{ 'dashboard.requests_will_appear' | translate }}</p>
               <p-button 
-                label="Pregled zahtjeva"
+                [label]="'dashboard.review_requests' | translate"
                 icon="pi pi-inbox"
                 severity="primary"
                 (onClick)="navigateToApplications()">
@@ -623,10 +628,12 @@ export class MentorDashboardComponent implements OnInit {
   constructor(
     private mentorService: MentorService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
+    this.translationService.initializeLanguage();
     this.loadDashboardData();
   }
 
@@ -753,7 +760,7 @@ export class MentorDashboardComponent implements OnInit {
 
   // Helper methods
   getStudentName(item: InternshipApplicationInfo | AssignedInternshipInfo): string {
-    if (!item.student) return 'Nepoznat student';
+    if (!item.student) return this.translationService.instant('common.unknown_student');
     
     const student = item.student;
     if (student.fullName) return student.fullName;
@@ -765,27 +772,27 @@ export class MentorDashboardComponent implements OnInit {
     if (fullNameFromParts) return fullNameFromParts;
     if (student.emailAddress) return student.emailAddress;
     
-    return 'Nepoznat student';
+    return this.translationService.instant('common.unknown_student');
   }
 
   getStatusText(status: InternshipStatus | string | number): string {
     if (typeof status === 'string') {
       switch (status) {
-        case 'Pending': return 'Na čekanju';
-        case 'Accepted': return 'Prihvaćeno';
-        case 'Rejected': return 'Odbačeno';
-        case 'Completed': return 'Završeno';
-        default: return 'Nepoznato';
+        case 'Pending': return this.translationService.instant('status.pending');
+        case 'Accepted': return this.translationService.instant('status.accepted');
+        case 'Rejected': return this.translationService.instant('status.rejected');
+        case 'Completed': return this.translationService.instant('status.completed');
+        default: return this.translationService.instant('status.unknown');
       }
     }
     
     const numericStatus = Number(status);
     switch (numericStatus) {
-      case InternshipStatus.Pending: return 'Na čekanju';
-      case InternshipStatus.Accepted: return 'Prihvaćeno';
-      case InternshipStatus.Rejected: return 'Odbačeno';
-      case InternshipStatus.Completed: return 'Završeno';
-      default: return 'Nepoznato';
+      case InternshipStatus.Pending: return this.translationService.instant('status.pending');
+      case InternshipStatus.Accepted: return this.translationService.instant('status.accepted');
+      case InternshipStatus.Rejected: return this.translationService.instant('status.rejected');
+      case InternshipStatus.Completed: return this.translationService.instant('status.completed');
+      default: return this.translationService.instant('status.unknown');
     }
   }
 
@@ -813,17 +820,17 @@ export class MentorDashboardComponent implements OnInit {
   getStudyLevelText(level: StudyLevel | string | number): string {
     if (typeof level === 'string') {
       switch (level) {
-        case 'Undergraduate': return 'Preddiplomski';
-        case 'Graduate': return 'Diplomski';
-        default: return 'Nepoznato';
+        case 'Undergraduate': return this.translationService.instant('status.undergraduate');
+        case 'Graduate': return this.translationService.instant('status.graduate');
+        default: return this.translationService.instant('status.unknown');
       }
     }
     
     const numericLevel = Number(level);
     switch (numericLevel) {
-      case StudyLevel.Undergraduate: return 'Preddiplomski';
-      case StudyLevel.Graduate: return 'Diplomski';
-      default: return 'Nepoznato';
+      case StudyLevel.Undergraduate: return this.translationService.instant('status.undergraduate');
+      case StudyLevel.Graduate: return this.translationService.instant('status.graduate');
+      default: return this.translationService.instant('status.unknown');
     }
   }
 
@@ -858,7 +865,7 @@ export class MentorDashboardComponent implements OnInit {
   private showError(message: string): void {
     this.messageService.add({
       severity: 'error',
-      summary: 'Greška',
+      summary: this.translationService.instant('common.error'),
       detail: message,
       life: 5000
     });
