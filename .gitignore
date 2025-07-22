@@ -20,9 +20,6 @@ publish/
 out/
 *.Publish.xml
 
-# Entity Framework Migrations
-Migrations/
-
 # DotCover
 .idea/
 *.dotCover
